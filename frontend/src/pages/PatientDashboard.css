@@ -1,0 +1,128 @@
+.dashboard-page {
+  animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.module-card-lume {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-thin);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.module-card-lume:hover {
+  border-color: var(--lume-cyan);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lume);
+}
+
+.module-card-lume::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--lume-cyan);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 10px var(--lume-cyan-glow);
+}
+
+.module-card-lume:hover::after {
+  transform: scaleX(1);
+}
+
+.module-icon {
+  color: var(--text-dim);
+  transition: var(--transition-fast);
+}
+
+.module-card-lume:hover .module-icon {
+  color: var(--lume-cyan);
+  filter: drop-shadow(0 0 8px var(--lume-cyan-glow));
+}
+
+.module-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.security-log-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-thin);
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.security-log-item:hover {
+  border-color: var(--lume-violet);
+  background: rgba(168, 85, 247, 0.05);
+}
+
+.log-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+
+.log-action {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.log-time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.pulse-sync {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.sync-active { color: #10b981; }
+.sync-pending { color: #f59e0b; }
+.sync-error { color: #ef4444; }

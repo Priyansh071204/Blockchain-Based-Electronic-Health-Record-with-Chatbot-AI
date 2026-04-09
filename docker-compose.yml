@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # ── IPFS Node ───────────────────────────────────────────────────────────────
+  ipfs:
+    image: ipfs/kubo:v0.22.0
+    container_name: ehr-ipfs
+    restart: unless-stopped
+    ports:
+      - "4001:4001" # P2P
+      - "5001:5001" # API
+      - "8080:8080" # Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+    networks:
+      - ehr-net
+
+  # ── Backend API ─────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ehr-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - IPFS_HOST=ipfs
+      - IPFS_PORT=5001
+      - IPFS_PROTOCOL=http
+      - IPFS_GATEWAY=http://localhost:8080/ipfs
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_wallet:/app/wallet
+      - backend_logs:/app/logs
+    depends_on:
+      - ipfs
+    networks:
+      - ehr-net
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ehr-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:4000/api
+      - REACT_APP_IPFS_GATEWAY=http://localhost:8080/ipfs
+    depends_on:
+      - backend
+    networks:
+      - ehr-net
+
+volumes:
+  ipfs_data:
+  backend_wallet:
+  backend_logs:
+
+
+networks:
+  ehr-net:
+    driver: bridge

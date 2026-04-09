@@ -1,0 +1,237 @@
+.dashboard-page {
+  animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.metric-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.metric-icon-box {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-thin);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: var(--transition-smooth);
+}
+
+.metric-card:hover .metric-icon-box {
+  color: var(--lume-cyan);
+  border-color: var(--lume-cyan);
+  box-shadow: 0 0 15px var(--lume-cyan-glow);
+}
+
+.chart-container {
+  height: 340px;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-table th {
+  padding: 1.25rem 1rem;
+  text-align: left;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border-thin);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-thin);
+  vertical-align: middle;
+}
+
+.admin-table tr {
+  transition: var(--transition-fast);
+}
+
+.admin-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.id-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--lume-cyan);
+  background: rgba(0, 242, 255, 0.05);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sharp);
+  border: 1px solid rgba(0, 242, 255, 0.1);
+}
+
+.ledger-events {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.event-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.event-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.event-indicator {
+  width: 4px;
+  height: auto;
+  min-height: 40px;
+  border-radius: var(--radius-full);
+}
+
+.event-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.event-hash {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.event-time {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.health-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-thin);
+}
+
+.health-status-row:last-child {
+  border-bottom: none;
+}
+
+.health-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.health-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tab-nav {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid var(--border-thin);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--lume-cyan);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--lume-cyan);
+  box-shadow: 0 0 10px var(--lume-cyan-glow);
+}
