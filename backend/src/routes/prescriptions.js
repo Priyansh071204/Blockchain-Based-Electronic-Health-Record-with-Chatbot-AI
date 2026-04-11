@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 const { submitTransaction, evaluateTransaction } = require('../config/fabric');
 const { authenticate, requireRole } = require('../middleware/auth');
+const logger = require('../config/logger');
 
 router.use(authenticate);
 

@@ -32,6 +32,7 @@ const PatientDashboard: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [billing, setBilling] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [syncStatus, setSyncStatus] = useState({ status: 'LEDGER_VERIFIED', verified: true });
 
   const activityData = [
@@ -56,12 +57,14 @@ const PatientDashboard: React.FC = () => {
         ehr.getMyRecords(),
         ehr.getMyPrescriptions(),
         ehr.getMyAppointments(),
-        ehr.getMyBilling()
+        ehr.getMyBilling(),
+        ehr.getMyAudit()
       ]);
       setRecords(r.data || []);
       setPrescriptions(p.data || []);
       setAppointments(a.data || []);
       setBilling(b.data || []);
+      setAuditLogs(Array.isArray(l.data) ? l.data : []);
     } catch (err) {
       console.error('dashboard refresh failed', err);
     }
@@ -172,16 +175,18 @@ const PatientDashboard: React.FC = () => {
           <div style={{ marginTop: '2.5rem' }}>
             <span className="metric-label" style={{ marginBottom: '1rem', display: 'block' }}>Identity Access Logs</span>
             <div className="ledger-events">
-              {accessLogs.map((log, index) => (
+              {auditLogs.length > 0 ? auditLogs.slice(0, 5).map((log, index) => (
                 <div key={index} className="security-log-item">
                   <Fingerprint className="text-dim" size={16} />
                   <div className="log-meta">
-                    <span className="log-title">{log.doctor}</span>
-                    <span className="log-action">{log.action}</span>
+                    <span className="log-title">{log.action || 'Ledger Update'}</span>
+                    <span className="log-action" style={{ fontSize: '0.65rem' }}>BY: {log.invoker || 'Identity_ID'}</span>
                   </div>
-                  <span className="log-time">{log.time}</span>
+                  <span className="log-time" style={{ fontSize: '0.65rem' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
                 </div>
-              ))}
+              )) : (
+                <p className="text-dim" style={{ fontSize: '0.75rem', padding: '1rem' }}>No ledger events recorded.</p>
+              )}
             </div>
           </div>
         </div>

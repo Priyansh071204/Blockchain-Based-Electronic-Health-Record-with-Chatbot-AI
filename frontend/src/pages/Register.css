@@ -150,3 +150,40 @@ select.input-lume {
   50% { left: 0; width: 100%; }
   100% { left: 100%; width: 0; }
 }
+
+.field-error-text {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #f87171;
+  margin-top: 0.35rem;
+  margin-left: 0.25rem;
+  text-transform: uppercase;
+}
+
+.input-lume.has-error {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  z-index: 5;
+}
+
+.password-toggle-btn:hover {
+  color: var(--lume-cyan);
+}

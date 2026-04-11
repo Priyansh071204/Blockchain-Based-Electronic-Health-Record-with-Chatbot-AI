@@ -146,7 +146,7 @@ async function getContract() {
     await gateway.connect(ccp, {
       wallet,
       identity: identityId,
-      discovery: { enabled: true, asLocalhost: true },
+      discovery: { enabled: false, asLocalhost: true },
     });
 
     network = await gateway.getNetwork(process.env.FABRIC_CHANNEL_NAME || 'mychannel');

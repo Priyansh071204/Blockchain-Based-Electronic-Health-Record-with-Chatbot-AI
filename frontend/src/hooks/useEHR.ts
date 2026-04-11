@@ -40,6 +40,7 @@ const ehrService = {
   getMyAppointments: () => axios.get(`${BASE_URL}/patients/my/appointments`),
   getMyBilling: () => axios.get(`${BASE_URL}/patients/my/billing`),
   getMyVitals: () => axios.get(`${BASE_URL}/patients/my/vitals`),
+  getMyAudit: () => axios.get(`${BASE_URL}/patients/my/audit`),
 
   // ── Utilities ──────────────────────────────────────────────────────────────
   getFabricStatus: () => axios.get(`${BASE_URL}/fabric/status`),

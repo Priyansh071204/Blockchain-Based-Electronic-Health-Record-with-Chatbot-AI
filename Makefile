@@ -25,8 +25,13 @@ dev: ## Start backend + frontend in mock/dev mode (no Fabric needed)
 	@echo "🚀 Starting EHR in development (mock) mode..."
 	@make dev-backend & make dev-frontend
 
-dev-backend: ## Start backend only
+dev-backend: ## Start backend only (auto-kills stale processes)
+	@make kill-backend
 	cd $(BACKEND_DIR) && npm run dev
+
+kill-backend: ## Kill any process running on backend port 4000
+	@echo "🔍 Checking for stale backend processes on :4000..."
+	@lsof -t -i :4000 | xargs kill -9 2>/dev/null || true
 
 dev-frontend: ## Start frontend only
 	cd $(FRONTEND_DIR) && npm start
@@ -62,10 +67,12 @@ fabric-up: ## Start Hyperledger Fabric network
 	@echo "⛓  Fabric network running"
 	@echo "   CouchDB → http://localhost:5984/_utils"
 
-fabric-down: ## Stop Fabric network
-	docker-compose -f docker-compose.fabric.yml down -v
+fabric-down: ## Stop Fabric network and clear state
+	docker-compose -f docker-compose.fabric.yml down -v --remove-orphans
 	@rm -rf ./fabric-network/crypto-config
 	@rm -rf ./fabric-network/channel-artifacts
+	@rm -rf ./fabric-network/couchdb
+	@echo "🧹 Fabric state cleared"
 
 fabric-generate: ## Generate crypto + channel artifacts
 	cd fabric-network && \

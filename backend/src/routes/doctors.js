@@ -16,7 +16,7 @@ const ok = (req, res, next) => {
 // GET /api/doctors/my/patients
 router.get('/my/patients', async (req, res, next) => {
   try {
-    const r = await evaluateTransaction('queryAllPatients', req.user.entityId, req.user.role);
+    const r = await evaluateTransaction('getDoctorPatients', req.user.entityId, req.user.entityId, req.user.role);
     res.json(r);
   } catch (err) { next(err); }
 });
@@ -70,7 +70,7 @@ router.patch('/:doctorId/verify',
   async (req, res, next) => {
     try {
       const r = await submitTransaction('verifyDoctor', req.params.doctorId, req.user.entityId, req.user.role);
-      res.json(r);
+      res.json({ message: 'Doctor verified successfully', result: r });
     } catch (err) { next(err); }
   }
 );

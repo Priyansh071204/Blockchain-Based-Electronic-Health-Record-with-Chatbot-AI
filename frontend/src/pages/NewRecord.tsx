@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useEHR } from '../hooks/useEHR';
 import { 
   FilePlus, 
@@ -16,8 +17,15 @@ import './NewRecord.css';
 
 const NewRecord: React.FC = () => {
   const ehr = useEHR();
+  const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [patientId, setPatientId] = useState('');
+
+  useEffect(() => {
+    if (location.state && (location.state as any).patientId) {
+      setPatientId((location.state as any).patientId);
+    }
+  }, [location]);
   const [recordType, setRecordType] = useState('Laboratory Report');
   const [diagnosis, setDiagnosis] = useState('');
   const [notes, setNotes] = useState('');

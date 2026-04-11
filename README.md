@@ -252,8 +252,9 @@ cd frontend && npm run dev
 | POST   | /patients/:id/access/grant        | Grant doctor access    | admin, patient   |
 | POST   | /patients/:id/access/revoke       | Revoke doctor access   | admin, patient   |
 | GET    | /patients/:id/records             | Get patient records    | admin, patient, doctor |
-| GET    | /patients/:id/prescriptions       | Get prescriptions      | admin, patient   |
-| GET    | /patients/:id/audit               | Get audit trail        | admin, patient   |
+| GET    | /patients/:id/prescriptions       | Get prescriptions      | admin, patient, doctor |
+| GET    | /patients/:id/audit               | Get audit trail        | admin, patient         |
+| GET    | /patients/my/audit                | Get self audit trail    | patient               |
 
 ### Doctors — `/api/doctors`
 
@@ -262,6 +263,7 @@ cd frontend && npm run dev
 | POST   | /doctors/register     | Register doctor   | admin  |
 | GET    | /doctors/:id          | Get doctor info   | any    |
 | PATCH  | /doctors/:id/verify   | Verify doctor     | admin  |
+| GET    | /doctors/my/patients  | Get assigned patients | doctor |
 
 ### Records — `/api/records`
 
@@ -335,6 +337,7 @@ Every action — allowed or denied — is logged immutably to the blockchain aud
 | `getRecordHistory`      | Get Fabric native history for a record         |
 | `queryAllPatients`      | CouchDB rich query — all patients (admin)      |
 | `queryAllDoctors`       | CouchDB rich query — all doctors (admin)       |
+| `getDoctorPatients`     | Get authorized patient list for a doctor       |
 | `verifyDoctor`          | Admin verifies doctor credentials              |
 
 ---
@@ -377,13 +380,13 @@ TOKEN=$(curl -s -X POST http://localhost:4000/api/auth/login \
 
 echo "Token: $TOKEN"
 
-# 2. Register a patient
+# 2. Register a patient (Auto-syncs to ledger)
 curl -s -X POST http://localhost:4000/api/patients/register \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"patientId":"pat_001","name":"Priya Patel","dob":"1990-05-15","gender":"Female","bloodGroup":"O+","emergencyContact":"+91-9876543210"}' | python3 -m json.tool
 
-# 3. Register a doctor
+# 3. Register a doctor (Requires license and specialization)
 curl -s -X POST http://localhost:4000/api/doctors/register \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \

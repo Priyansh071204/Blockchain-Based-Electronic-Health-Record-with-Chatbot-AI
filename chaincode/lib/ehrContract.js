@@ -426,6 +426,22 @@ class EHRContract extends Contract {
     return JSON.stringify(results);
   }
 
+  async getDoctorPatients(ctx, doctorId, callerId, callerRole) {
+    if (callerRole !== 'doctor' && callerRole !== 'admin') throw new Error('Unauthorized');
+    const dKey = `DOCTOR_${doctorId}`;
+    const doctor = await this._get(ctx, dKey);
+    
+    const results = [];
+    for (const pId of (doctor.patientIds || [])) {
+      try {
+        const pKey = `PATIENT_${pId}`;
+        const p = await this._get(ctx, pKey);
+        results.push(p);
+      } catch (err) { /* Skip missing patients */ }
+    }
+    return JSON.stringify(results);
+  }
+
   async verifyDoctor(ctx, doctorId, callerId, callerRole) {
     if (callerRole !== 'admin') throw new Error('Unauthorized: Admin only');
     const key = `DOCTOR_${doctorId}`;

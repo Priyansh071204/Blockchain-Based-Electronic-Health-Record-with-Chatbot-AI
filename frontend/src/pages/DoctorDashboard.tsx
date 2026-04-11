@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEHR } from '../hooks/useEHR';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -21,7 +22,8 @@ import './DoctorDashboard.css';
 const DoctorDashboard: React.FC = () => {
   const ehr = useEHR();
   const { user } = useAuth();
-  const [, setPatients] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const [patients, setPatients] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const triageDistribution = [
@@ -49,9 +51,9 @@ const DoctorDashboard: React.FC = () => {
     fetchPatients();
   }, []);
 
-  const filteredTriage = triageQueue.filter(p => 
+  const filteredTriage = patients.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.id.toLowerCase().includes(searchQuery.toLowerCase())
+    p.patientId?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -68,7 +70,7 @@ const DoctorDashboard: React.FC = () => {
           <p className="text-dim">Real-time patient triage and ledger-backed medical history.</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button className="btn-lume">
+          <button className="btn-lume" onClick={() => navigate('/doctor/records/new')}>
             <PlusCircle size={16} />
             <span>New Consultation</span>
           </button>
@@ -168,27 +170,35 @@ const DoctorDashboard: React.FC = () => {
                 <tbody>
                   {filteredTriage.map((p) => (
                     <tr key={p.id} className="triage-row">
-                      <td><span className="id-badge">{p.id}</span></td>
+                      <td><span className="id-badge">{p.patientId || p.id}</span></td>
                       <td>
                         <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{p.name}</span>
                       </td>
                       <td>
-                        <span className={`badge-status ${p.status === 'Urgent' ? 'urgent' : p.status === 'Waiting' ? 'waiting' : 'session'}`}>
-                          {p.status}
+                        <span className={`badge-status ${p.verified ? 'session' : 'waiting'}`}>
+                          {p.verified ? 'AUTHORIZED' : 'PENDING'}
                         </span>
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-dim)', fontSize: '0.75rem' }}>
                           <Clock size={12} />
-                          <span style={{ fontFamily: 'var(--font-mono)' }}>{p.time}</span>
+                          <span style={{ fontFamily: 'var(--font-mono)' }}>{p.updatedAt ? new Date(p.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}</span>
                         </div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                          <button className="btn-action" title="Commit Record">
+                          <button 
+                            className="btn-action" 
+                            title="Commit Record"
+                            onClick={() => navigate('/doctor/records/new', { state: { patientId: p.id } })}
+                          >
                             <SquarePlus size={16} />
                           </button>
-                          <button className="btn-action" title="Audit History">
+                          <button 
+                            className="btn-action" 
+                            title="Audit History"
+                            onClick={() => navigate(`/doctor/records`, { state: { patientId: p.patientId } })}
+                          >
                             <HistoryIcon size={16} />
                           </button>
                         </div>

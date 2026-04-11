@@ -49,6 +49,20 @@ router.get('/my/vitals', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+router.get('/my/prescriptions', async (req, res, next) => {
+  try {
+    const r = await evaluateTransaction('getPatientPrescriptions', req.user.entityId, req.user.entityId, req.user.role);
+    res.json(r);
+  } catch (err) { next(err); }
+});
+
+router.get('/my/audit', async (req, res, next) => {
+  try {
+    const r = await evaluateTransaction('getAuditTrail', req.user.entityId, req.user.entityId, req.user.role);
+    res.json(r);
+  } catch (err) { next(err); }
+});
+
 // ── PATIENT REGISTRATION ───────────────────────────────────────────────────
 
 router.post('/register',

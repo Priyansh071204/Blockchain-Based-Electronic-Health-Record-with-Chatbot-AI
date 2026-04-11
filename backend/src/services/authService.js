@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../config/logger');
+const { submitTransaction } = require('../config/fabric');
 
 // In-memory store – swap with PostgreSQL/MongoDB in production
 const users = new Map();
@@ -57,7 +58,8 @@ function sanitize(u) {
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
-async function register({ email, password, role, entityId, name }) {
+async function register(data) {
+  const { email, password, role, entityId, name } = data;
   if ([...users.values()].find(u => u.email === email))
     throw Object.assign(new Error('Email already registered'), { status: 409 });
 
@@ -70,6 +72,37 @@ async function register({ email, password, role, entityId, name }) {
   };
   users.set(id, user);
   logger.info(`Registered ${role}: ${email}`);
+
+  // Provision onto Blockchain Ledger
+  try {
+    if (role === 'doctor') {
+      await submitTransaction(
+        'registerDoctor',
+        id, // entityId
+        name,
+        data.specialization || 'General',
+        data.licenseNumber || 'PENDING',
+        data.hospital || 'Unassigned',
+        'admin' // callerRole (system impersonating admin)
+      );
+    } else if (role === 'patient') {
+      await submitTransaction(
+        'registerPatient',
+        id,
+        name,
+        data.dob || '1970-01-01',
+        data.gender || 'Other',
+        data.bloodGroup || 'NA',
+        data.emergencyContact || 'NA',
+        'admin' // callerRole
+      );
+    }
+  } catch (ledgerErr) {
+    logger.error(`Blockchain registration failed for ${email}: ${ledgerErr.message}`);
+    // We keep the user record in authService so they can at least log in, 
+    // but the admin will see they aren't on the ledger.
+  }
+
   return sanitize(user);
 }
 
