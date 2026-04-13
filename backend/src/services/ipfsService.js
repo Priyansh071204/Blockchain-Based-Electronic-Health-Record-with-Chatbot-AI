@@ -8,7 +8,6 @@ let _mocked = false;
 
 async function getClient() {
   if (_client) return _client;
-  if (_mocked) return null;
 
   try {
     // ipfs-http-client v56 uses CJS export
@@ -24,9 +23,9 @@ async function getClient() {
     logger.info('IPFS client connected successfully');
     return _client;
   } catch (err) {
-    logger.warn(`IPFS unavailable – running in mock mode: ${err.message}`);
-    _mocked = true;
-    return null;
+    logger.error(`❌ IPFS connection failed: ${err.message}`);
+    _client = null;
+    throw err; // Strict Real Mode: fail if IPFS is down
   }
 }
 

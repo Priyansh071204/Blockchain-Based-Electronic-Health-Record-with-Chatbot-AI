@@ -20,12 +20,16 @@ install: ## Install all dependencies
 	cd ./chaincode && npm install
 	@echo "✅ All dependencies installed"
 
-# ── Development (no Fabric – mock mode) ───────────────────────────────────────
-dev: ## Start backend + frontend in mock/dev mode (no Fabric needed)
-	@echo "🚀 Starting EHR in development (mock) mode..."
+# ── Development ───────────────────────────────────────────────────────────────
+dev: ## Start backend + frontend in configured mode (defaults to Real)
+	@echo "🚀 Starting EHR in Real Mode..."
 	@make dev-backend & make dev-frontend
 
-dev-backend: ## Start backend only (auto-kills stale processes)
+dev-mock: ## Start backend + frontend in MOCK mode (no Fabric needed)
+	@echo "🚀 Starting EHR in MOCK mode..."
+	export MOCK_FABRIC=true && make dev-backend & make dev-frontend
+
+dev-backend: ## Start backend only
 	@make kill-backend
 	cd $(BACKEND_DIR) && npm run dev
 

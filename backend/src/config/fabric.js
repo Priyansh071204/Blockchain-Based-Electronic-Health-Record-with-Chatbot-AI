@@ -15,8 +15,8 @@ let contract = null;
 const store = new Map();
 let mockIdCounter = 1000;
 
-// Seed some initial data for the default patient (PAT001)
-// Seed some initial data for the default patient (PAT001)
+// Seed some initial data for the default patient (PAT001) if in MOCK mode
+if (process.env.MOCK_FABRIC === 'true') {
 (async () => {
   const ts = new Date().toISOString();
     
@@ -165,6 +165,7 @@ let mockIdCounter = 1000;
   const p = store.get('PATIENT_PAT001');
   if (p) p.vitalIds = vitals;
 })();
+}
 
 // ── Connection Profile loader ─────────────────────────────────────────────────
 function loadCCP() {
@@ -178,7 +179,7 @@ function loadCCP() {
 async function getContract() {
   if (process.env.MOCK_FABRIC === 'true') return null;
   const ccp = loadCCP();
-  if (!ccp) return null;
+  if (!ccp) throw new Error('Fabric Connection Profile (connection-profile.json) not found. Cannot connect to Real Blockchain.');
 
   if (contract) return contract;
 
@@ -189,8 +190,7 @@ async function getContract() {
     const identityId = process.env.FABRIC_ADMIN_ID || 'admin';
     const identity = await wallet.get(identityId);
     if (!identity) {
-      logger.warn(`⚠️ Blockchain identity '${identityId}' not found. Falling back to MOCK mode.`);
-      return null;
+      throw new Error(`Blockchain identity '${identityId}' not found in wallet. Ensure you have enrolled the admin.`);
     }
 
     gateway = new Gateway();
@@ -206,11 +206,11 @@ async function getContract() {
     logger.info('⛓  Fabric Gateway Connected');
     return contract;
   } catch (err) {
-    logger.warn(`⚠️ Fabric Gateway Connection Failed: ${err.message}. Falling back to MOCK mode.`);
+    logger.error(`❌ Fabric Gateway Connection Failed: ${err.message}`);
     gateway = null;
     network = null;
     contract = null;
-    return null;
+    throw err; // Throwing error instead of falling back to mock
   }
 }
 
@@ -218,7 +218,7 @@ async function getContract() {
 async function submitTransaction(fn, ...args) {
   const fabricContract = await getContract();
   if (!fabricContract) {
-    logger.warn(`[MOCK] submitTransaction: ${fn}`);
+    // This only happens if MOCK_FABRIC is explicitly 'true'
     return mockInvoke(fn, args);
   }
 
@@ -247,7 +247,7 @@ async function submitTransaction(fn, ...args) {
 async function evaluateTransaction(fn, ...args) {
   const fabricContract = await getContract();
   if (!fabricContract) {
-    logger.warn(`[MOCK] evaluateTransaction: ${fn}`);
+    // This only happens if MOCK_FABRIC is explicitly 'true'
     return mockInvoke(fn, args);
   }
 
@@ -494,9 +494,12 @@ async function getFabricStatus() {
   const ccp = loadCCP();
   if (!ccp) return { status: 'offline', mode: 'none', reason: 'No connection profile' };
   
-  const fabricContract = await getContract();
+  const fabricContract = await getContract().catch(() => null);
   if (!fabricContract) {
-    return { status: 'mock', mode: 'development', node: 'local-emulator' };
+    if (process.env.MOCK_FABRIC === 'true') {
+        return { status: 'mock', mode: 'development', node: 'local-emulator' };
+    }
+    return { status: 'offline', mode: 'none', reason: 'Fabric Gateway Unavailable' };
   }
   
   return { 

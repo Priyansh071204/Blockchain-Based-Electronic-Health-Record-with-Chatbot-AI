@@ -102,43 +102,40 @@ ehr-blockchain/
 
 ---
 
-## ⚡ Quick Start (Development Mode — Mock Mode)
+## ⚡ Quick Start (Real Mode — Production Architecture)
 
-The backend runs in **mock mode** automatically when no Fabric connection profile is found. This is the fastest way to test the React frontend and all system features.
+The system is configured to use **Hyperledger Fabric** and **IPFS** by default. Ensure your local infrastructure is active before starting.
 
-### 1. Start IPFS Node (Docker)
+### 1. Start Infrastructure (Docker)
 The node is required for decentralized file storage:
 ```bash
-make ipfs-up
+make ipfs-up     # Start IPFS
+make fabric-up   # Start Fabric Peer/Orderer/CA
 ```
-*Verify with `docker ps` — `ipfs.ehr.com` should be active.*
 
 ### 2. Start Backend API
 Open a terminal:
 ```bash
 cd backend
-npm install   # (First time only)
+npm install
 npm run dev
 ```
-*Endpoint: `http://localhost:4000`*
+*Wait for `⛓ Fabric Gateway Connected` in the logs.*
 
 ### 3. Start React Frontend (Vite)
 Open a second terminal:
 ```bash
 cd frontend
-npm install   # (First time only)
+npm install
 npm run dev
 ```
-*Dashboard: `http://localhost:5173`*
 
-### 4. Login Credentials
-Use the following identities to explore the dashboard roles:
-
-| Role    | Email               | Password   |
-|---------|---------------------|------------|
-| Admin   | admin@ehr.local     | Admin@123  |
-| Doctor  | doctor@ehr.local    | Doctor@123 |
-| Patient | patient@ehr.local   | Patient@123 |
+### 4. Mock Mode (Alternative)
+If you do not have Fabric installed, you can run in **Mock Mode** using:
+```bash
+make dev-mock
+```
+*Note: In mock mode, data is in-memory and will reset on server restart.*
 
 *Register new MSP identities directly at `/register`.*
 
