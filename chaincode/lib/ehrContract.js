@@ -546,6 +546,20 @@ class EHRContract extends Contract {
     }
     return JSON.stringify(results);
   }
+
+  async getPatientVitals(ctx, patientId, callerId, callerRole) {
+    if (callerRole === 'patient' && callerId !== patientId) throw new Error('Unauthorized');
+    if (callerRole === 'doctor') {
+      const access = await this._checkDoctorAccess(ctx, patientId, callerId);
+      if (!access.allowed) throw new Error(`Access denied: ${access.reason}`);
+    }
+    const patient = await this._get(ctx, `PATIENT_${patientId}`);
+    const results = [];
+    for (const id of (patient.vitalIds || [])) {
+      try { results.push(await this._get(ctx, `VIT_${id}`)); } catch (_) {}
+    }
+    return JSON.stringify(results);
+  }
 }
 
 module.exports = EHRContract;

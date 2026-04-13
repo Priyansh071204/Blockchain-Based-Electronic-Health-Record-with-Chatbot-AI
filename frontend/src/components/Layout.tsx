@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, 
   LayoutDashboard, 
@@ -76,35 +77,78 @@ const Layout: React.FC = () => {
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
-      <aside className={`main-sidenav ${isSidebarOpen ? 'open' : 'closed'}`}>
+      {/* Animated Sidebar */}
+      <motion.aside 
+        initial={false}
+        animate={{ width: isSidebarOpen ? 260 : 80 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="main-sidenav"
+      >
         <div className="sidebar-header">
-          <div className="logo-area" onClick={() => navigate('/')}>
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="logo-area" 
+            onClick={() => navigate('/')}
+          >
             <Shield className="logo-icon-svg" size={24} />
-            <span className="logo-text">EHR <span className="text-cyan">BLOCKCHAIN</span></span>
-          </div>
+            {isSidebarOpen && (
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="logo-text"
+              >
+                EHR <span className="text-cyan">BLOCKCHAIN</span>
+              </motion.span>
+            )}
+          </motion.div>
           
           <div className="user-profile-summary">
             <div className="profile-avatar">{userInitials}</div>
-            {isSidebarOpen && (
-              <div className="profile-info">
-                <span className="msp-label">MSP Verified</span>
-                <span className="user-id font-mono">{user?.email}</span>
-                <span className={`badge-tech success mt-1 role-${user?.role}`}>{user?.role}</span>
-              </div>
-            )}
+            <AnimatePresence>
+              {isSidebarOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className="profile-info"
+                >
+                  <span className="msp-label">MSP Verified</span>
+                  <span className="user-id font-mono">{user?.email}</span>
+                  <span className={`badge-tech success mt-1 role-${user?.role}`}>{user?.role}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
         <nav className="sidebar-links">
-          {navItems.map((item) => (
+          {navItems.map((item, index) => (
             <NavLink 
               key={item.label}
               to={item.link}
               className={({ isActive }) => `nav-rail-item ${isActive ? 'active' : ''}`}
             >
-              {item.icon}
-              {isSidebarOpen && <span className="nav-label">{item.label}</span>}
+              <motion.div
+                whileHover={{ scale: 1.2, color: 'var(--lume-cyan)' }}
+                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                {item.icon}
+              </motion.div>
+              <AnimatePresence>
+                {isSidebarOpen && (
+                  <motion.span 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="nav-label"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </NavLink>
           ))}
         </nav>
@@ -113,18 +157,30 @@ const Layout: React.FC = () => {
           <div className="version-tag">PROTOCOL v0.5.0</div>
           <div className="node-status scanline">
             <span className="status-dot"></span>
-            <span>NETWORK ONLINE</span>
+            {isSidebarOpen && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                NETWORK ONLINE
+              </motion.span>
+            )}
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main Content Area */}
       <div className="main-content-wrapper">
         <header className="top-bar">
           <div className="header-left">
-            <button className="icon-btn menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="icon-btn menu-toggle" 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
               <Menu size={18} />
-            </button>
+            </motion.button>
             <div className="search-premium">
               <Search className="search-icon" size={14} />
               <input type="text" placeholder="Protocol query..." />
@@ -132,19 +188,33 @@ const Layout: React.FC = () => {
           </div>
           
           <div className="toolbar-actions">
-            <button className="icon-btn" onClick={toggleTheme}>
+            <motion.button 
+              whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
+              className="icon-btn" 
+              onClick={toggleTheme}
+            >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            </motion.button>
             
-            <button className="icon-btn bell-btn">
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="icon-btn bell-btn"
+            >
               <Bell size={18} />
               <span className="badge-count">2</span>
-            </button>
+            </motion.button>
 
             <div className="user-avatar-trigger">
-              <div className="top-avatar" onClick={() => logout()}>
+              <motion.div 
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+                whileTap={{ scale: 0.9 }}
+                className="top-avatar" 
+                onClick={() => logout()}
+              >
                 <LogOut size={14} />
-              </div>
+              </motion.div>
             </div>
           </div>
         </header>
@@ -160,3 +230,4 @@ const Layout: React.FC = () => {
 };
 
 export default Layout;
+

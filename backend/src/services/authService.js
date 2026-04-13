@@ -10,7 +10,8 @@ const { submitTransaction } = require('../config/fabric');
 const users = new Map();
 
 // ── Seed demo accounts on startup ──────────────────────────────────────────────
-(async () => {
+// ── Seed demo accounts on startup ──────────────────────────────────────────────
+const seedPromise = (async () => {
   const adminHash = await bcrypt.hash('Admin@123', 12);
   users.set('admin_001', {
     id: 'admin_001', email: 'admin@ehr.local', passwordHash: adminHash,
@@ -141,4 +142,4 @@ function getByEntityId(entityId) {
   return u ? sanitize(u) : null;
 }
 
-module.exports = { register, login, refresh, getById, getAll, getByEntityId };
+module.exports = { register, login, refresh, getById, getAll, getByEntityId, seedPromise };

@@ -70,12 +70,14 @@ app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 app.use(errorHandler);
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  logger.info(`🏥 EHR Backend  →  http://localhost:${PORT}`);
-  logger.info(`🌿 Environment  →  ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`📦 IPFS         →  ${process.env.IPFS_PROTOCOL}://${process.env.IPFS_HOST}:${process.env.IPFS_PORT}`);
-  logger.info(`⛓  Fabric       →  ${process.env.FABRIC_CHANNEL_NAME} / ${process.env.FABRIC_CHAINCODE_NAME}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    logger.info(`🏥 EHR Backend  →  http://localhost:${PORT}`);
+    logger.info(`🌿 Environment  →  ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`📦 IPFS         →  ${process.env.IPFS_PROTOCOL}://${process.env.IPFS_HOST}:${process.env.IPFS_PORT}`);
+    logger.info(`⛓  Fabric       →  ${process.env.FABRIC_CHANNEL_NAME} / ${process.env.FABRIC_CHAINCODE_NAME}`);
+  });
+}
 
 module.exports = app;

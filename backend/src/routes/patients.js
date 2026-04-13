@@ -63,31 +63,6 @@ router.get('/my/audit', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// ── PATIENT REGISTRATION ───────────────────────────────────────────────────
-
-router.post('/register',
-  body('patientId').trim().notEmpty(),
-  body('name').trim().notEmpty(),
-  body('dob').notEmpty(),
-  body('gender').isIn(['Male', 'Female', 'Other']),
-  body('bloodGroup').notEmpty(),
-  body('emergencyContact').notEmpty(),
-  ok,
-  async (req, res, next) => {
-    try {
-      const { patientId, name, dob, gender, bloodGroup, emergencyContact } = req.body;
-      const result = await submitTransaction(
-        'registerPatient',
-        patientId, name, dob, gender, bloodGroup, emergencyContact, req.user.role
-      );
-      res.status(201).json(result);
-    } catch (err) {
-      if (err.message.includes('already exists')) return res.status(409).json({ error: err.message });
-      next(err);
-    }
-  }
-);
-
 // ── PARAMETERIZED ROUTES ────────────────────────────────────────────────────
 
 router.get('/:patientId', async (req, res, next) => {

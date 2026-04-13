@@ -16,75 +16,125 @@ const store = new Map();
 let mockIdCounter = 1000;
 
 // Seed some initial data for the default patient (PAT001)
+// Seed some initial data for the default patient (PAT001)
 (async () => {
   const ts = new Date().toISOString();
     
+  // DOCTORS
+  store.set('DOCTOR_DOC001', {
+    docType: 'doctor',
+    doctorId: 'DOC001',
+    name: 'Dr. Smith',
+    specialization: 'Cardiology',
+    licenseNumber: 'MD123456',
+    hospital: 'City General',
+    createdAt: ts,
+    updatedAt: ts,
+    active: true,
+    verified: true,
+    version: 1
+  });
+
+  store.set('DOCTOR_DOC002', {
+    docType: 'doctor',
+    doctorId: 'DOC002',
+    name: 'Dr. Sharma',
+    specialization: 'General Medicine',
+    licenseNumber: 'MD789012',
+    hospital: 'Metro Health',
+    createdAt: ts,
+    updatedAt: ts,
+    active: true,
+    verified: true,
+    version: 1
+  });
+
   // PATIENTS
   store.set('PATIENT_PAT001', {
-    id: 'PAT001',
+    docType: 'patient',
+    patientId: 'PAT001',
     name: 'John Doe',
     email: 'patient@ehr.local',
     role: 'patient',
+    dob: '1985-05-15',
+    gender: 'Male',
+    bloodGroup: 'O+',
+    emergencyContact: 'Jane Doe (+1-555-0199)',
     recordIds: ['REC001', 'REC002', 'REC003', 'REC004'],
     prescriptionIds: ['RX001', 'RX002'],
     appointmentIds: ['APPO001'],
     billingIds: ['BILL001'],
-    authorizedDoctors: []
+    authorizedDoctors: [
+        { doctorId: 'DOC001', grantedAt: ts, expiresAt: null, active: true },
+        { doctorId: 'DOC002', grantedAt: ts, expiresAt: null, active: true }
+    ],
+    createdAt: ts,
+    updatedAt: ts,
+    active: true,
+    version: 1
   });
 
   // RECORDS
   store.set('RECORD_REC001', {
-    id: 'REC001',
+    docType: 'healthRecord',
+    recordId: 'REC001',
     patientId: 'PAT001',
     doctorId: 'DOC001',
     doctorName: 'Dr. Smith',
-    type: 'Lab Result',
+    recordType: 'Lab Result',
     title: 'Complete Blood Count (CBC)',
-    diagnosis: 'Baseline metabolic panel showing normal levels of hemoglobin and white blood cells.',
-    tags: ['Hematology', 'Routine'],
-    date: '2026-03-15T10:00:00Z',
+    description: 'Baseline metabolic panel showing normal levels of hemoglobin and white blood cells.',
+    metadata: { tags: ['Hematology', 'Routine'] },
+    createdAt: '2026-03-15T10:00:00Z',
+    updatedAt: '2026-03-15T10:00:00Z',
     ledgerStatus: 'verified',
     txHash: '0x7e2a8b9c4d5e6f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5'
   });
 
   store.set('RECORD_REC002', {
-    id: 'REC002',
+    docType: 'healthRecord',
+    recordId: 'REC002',
     patientId: 'PAT001',
     doctorId: 'DOC002',
     doctorName: 'Dr. Sharma',
-    type: 'Prescription',
+    recordType: 'Prescription',
     title: 'Antihistamine Protocol',
-    diagnosis: 'Seasonal allergy management. Prescribed Cetirizine 10mg.',
-    tags: ['Allergy', 'Medication'],
-    date: '2026-03-20T14:30:00Z',
+    description: 'Seasonal allergy management. Prescribed Cetirizine 10mg.',
+    metadata: { tags: ['Allergy', 'Medication'] },
+    createdAt: '2026-03-20T14:30:00Z',
+    updatedAt: '2026-03-20T14:30:00Z',
     ledgerStatus: 'verified',
     txHash: '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2'
   });
 
   store.set('RECORD_REC003', {
-    id: 'REC003',
+    docType: 'healthRecord',
+    recordId: 'REC003',
     patientId: 'PAT001',
     doctorId: 'DOC001',
     doctorName: 'Dr. Smith',
-    type: 'Radiology',
+    recordType: 'Radiology',
     title: 'Chest X-Ray',
-    diagnosis: 'Post-viral cough follow-up. Lungs clear, no signs of congestion or inflammation.',
-    tags: ['Imaging', 'Diagnostics'],
-    date: '2025-11-10T09:15:00Z',
+    description: 'Post-viral cough follow-up. Lungs clear, no signs of congestion or inflammation.',
+    metadata: { tags: ['Imaging', 'Diagnostics'] },
+    createdAt: '2025-11-10T09:15:00Z',
+    updatedAt: '2025-11-10T09:15:00Z',
     ledgerStatus: 'verified',
     txHash: '0x9c8b7a6d5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8'
   });
 
   store.set('RECORD_REC004', {
-    id: 'REC004',
+    docType: 'healthRecord',
+    recordId: 'REC004',
     patientId: 'PAT001',
     doctorId: 'DOC003',
     doctorName: 'Dr. Chen',
-    type: 'Diagnosis',
+    recordType: 'Diagnosis',
     title: 'Hypertension Screening',
-    diagnosis: 'Blood pressure recorded at 135/85 mmHg. Recommended lifestyle modifications and low sodium diet.',
-    tags: ['Cardiology', 'Prevention'],
-    date: '2025-05-22T16:45:00Z',
+    description: 'Blood pressure recorded at 135/85 mmHg. Recommended lifestyle modifications and low sodium diet.',
+    metadata: { tags: ['Cardiology', 'Prevention'] },
+    createdAt: '2025-05-22T16:45:00Z',
+    updatedAt: '2025-05-22T16:45:00Z',
     ledgerStatus: 'verified',
     txHash: '0x4f5e6d7c8b9a0f1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c2b3a4f5'
   });
@@ -126,6 +176,7 @@ function loadCCP() {
 
 // ── Singleton Gateway Initializer ─────────────────────────────────────────────
 async function getContract() {
+  if (process.env.MOCK_FABRIC === 'true') return null;
   const ccp = loadCCP();
   if (!ccp) return null;
 
@@ -336,12 +387,49 @@ function mockInvoke(fn, args) {
       rx.status = 'DISPENSED'; rx.dispensedAt = ts; rx.dispensedBy = args[1]; rx.version += 1;
       return rx;
     }
+    case 'getDoctorPatients': {
+      const doctorId = args[0];
+      const patients = [...store.values()]
+        .filter(v => v.docType === 'patient' && v.authorizedDoctors && v.authorizedDoctors.some(a => a.doctorId === doctorId && a.active))
+        .map(p => ({
+          patientId: p.patientId,
+          name: p.name,
+          dob: p.dob,
+          gender: p.gender,
+          bloodGroup: p.bloodGroup,
+          grantedAt: p.authorizedDoctors.find(a => a.doctorId === doctorId)?.grantedAt
+        }));
+      logger.info(`[MOCK] getDoctorPatients for ${doctorId}: Found ${patients.length}`);
+      return patients;
+    }
+    case 'queryRecordsByDoctor': {
+      const doctorId = args[0];
+      const records = [...store.values()]
+        .filter(v => v.docType === 'healthRecord' && v.doctorId === doctorId);
+      logger.info(`[MOCK] queryRecordsByDoctor for ${doctorId}: Found ${records.length}`);
+      return records;
+    }
+    case 'getRecordHistory': {
+      const recordId = args[0];
+      const r = store.get(`RECORD_${recordId}`);
+      if (!r) throw new Error(`Record ${recordId} not found`);
+      return [
+        { txId: 'tx1', value: r, timestamp: r.createdAt, isDelete: false },
+        { txId: 'tx2', value: { ...r, status: 'ACCESSED' }, timestamp: ts, isDelete: false }
+      ];
+    }
     case 'queryAllPatients':
       return [...store.values()].filter(v => v.docType === 'patient');
     case 'queryAllDoctors':
       return [...store.values()].filter(v => v.docType === 'doctor');
-    case 'getAuditTrail':
-      return [];
+    case 'getAuditTrail': {
+      const entityId = args[0] || 'all';
+      return [
+        { timestamp: ts, action: 'LOGIN', user: entityId, details: 'User logged into the system' },
+        { timestamp: new Date(Date.now() - 3600000).toISOString(), action: 'QUERY', user: entityId, details: 'Accessed patient records' },
+        { timestamp: new Date(Date.now() - 7200000).toISOString(), action: 'UPDATE', user: entityId, details: 'Modified contact information' }
+      ];
+    }
     case 'verifyDoctor': {
       const d = store.get(`DOCTOR_${args[0]}`);
       if (!d) throw new Error(`Doctor ${args[0]} not found`);
@@ -402,6 +490,7 @@ function mockInvoke(fn, args) {
 }
 
 async function getFabricStatus() {
+  if (process.env.MOCK_FABRIC === 'true') return { status: 'mock', mode: 'development', node: 'local-emulator' };
   const ccp = loadCCP();
   if (!ccp) return { status: 'offline', mode: 'none', reason: 'No connection profile' };
   
@@ -419,4 +508,10 @@ async function getFabricStatus() {
   };
 }
 
-module.exports = { submitTransaction, evaluateTransaction, disconnect, getFabricStatus };
+function __resetMockStore() {
+  store.clear();
+  mockIdCounter = 1000;
+  logger.info('[MOCK] Store reset for testing');
+}
+
+module.exports = { submitTransaction, evaluateTransaction, disconnect, getFabricStatus, __resetMockStore };

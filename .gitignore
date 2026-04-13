@@ -44,6 +44,27 @@ Thumbs.db
 *.swp
 *.swo
 
-# Test coverage
+# Test coverage & reports
 coverage/
 .nyc_output/
+playwright-report/
+test-results/
+test-results*
+actual-results/
+
+# Build & Tooling
+dist/
+build/
+.next/
+out/
+.parcel-cache/
+.cache/
+.eslintcache
+
+# Dependency Lockfiles (if not needed in root)
+# package-lock.json
+
+# Large Binary / Sample Data
+fabric-samples/
+bin/
+chaincode/*.tar.gz

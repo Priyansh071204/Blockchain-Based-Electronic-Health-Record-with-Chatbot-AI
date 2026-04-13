@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEHR } from '../hooks/useEHR';
+import PageTransition from '../components/PageTransition';
 import { 
   FileText, 
   Search, 
@@ -22,7 +24,6 @@ const DoctorRecords: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Use a constant for IPFS gateway to avoid 'process' issues in some browsers/bundlers
   const IPFS_GATEWAY = 'http://localhost:8080/ipfs';
 
   useEffect(() => {
@@ -63,129 +64,187 @@ const DoctorRecords: React.FC = () => {
     return <FileText size={18} />;
   };
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, x: -20 },
+    show: { opacity: 1, x: 0 }
+  };
+
   if (loading) {
     return (
-      <div className="medical-records-page p-8">
-        <header style={{ marginBottom: '2.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <span className="badge-lume pulse-lume" style={{ color: '#00f2ff' }}>Doctor Audit Console</span>
-            <span className="metric-label" style={{ color: 'var(--text-dim)' }}>AUTH_RECORDS_INDEXING</span>
+      <PageTransition>
+        <div className="medical-records-page p-8">
+          <header style={{ marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <span className="badge-lume pulse-lume" style={{ color: '#00f2ff' }}>Doctor Audit Console</span>
+              <span className="metric-label" style={{ color: 'var(--text-dim)' }}>AUTH_RECORDS_INDEXING</span>
+            </div>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Authored <span className="text-cyan">Records</span></h1>
+            <p className="text-dim">History of clinical entries issued by you across the blockchain network.</p>
+          </header>
+          <div className="empty-state">
+            <span className="metric-label pulse-lume">Retrieving Author Attribution Logs...</span>
           </div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Authored <span className="text-cyan">Records</span></h1>
-          <p className="text-dim">History of clinical entries issued by you across the blockchain network.</p>
-        </header>
-        <div className="empty-state">
-          <span className="metric-label pulse-lume">Retrieving Author Attribution Logs...</span>
         </div>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="medical-records-page p-8">
-      <header style={{ marginBottom: '2.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <span className="badge-lume pulse-lume" style={{ color: '#00f2ff' }}>Doctor Audit Console</span>
-          <span className="metric-label" style={{ color: 'var(--text-dim)' }}>MSP_VERIFIED_AUTHOR</span>
-        </div>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Authored <span className="text-cyan">Records</span></h1>
-        <p className="text-dim">History of clinical entries issued by you across the blockchain network.</p>
-      </header>
-
-      <div className="record-controls">
-        <div className="filter-group">
-          {['all', 'lab', 'imaging', 'prescription', 'consultation'].map(t => (
-            <button 
-              key={t}
-              className={`tab-btn ${filter === t ? 'active' : ''}`}
-              style={{ fontSize: '0.6rem', padding: '0.5rem 1rem' }}
-              onClick={() => setFilter(t)}
-            >
-              {t.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
-        <div className="search-console" style={{ width: '400px', height: '44px' }}>
-          <input 
-            type="text" 
-            placeholder="Filter by description or Patient ID..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 1rem' }}>
-            <Search size={16} className="text-dim" />
+    <PageTransition>
+      <div className="medical-records-page p-8">
+        <motion.header 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{ marginBottom: '2.5rem' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <span className="badge-lume pulse-lume" style={{ color: '#00f2ff' }}>Doctor Audit Console</span>
+            <span className="metric-label" style={{ color: 'var(--text-dim)' }}>MSP_VERIFIED_AUTHOR</span>
           </div>
-        </div>
-      </div>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Authored <span className="text-cyan">Records</span></h1>
+          <p className="text-dim">History of clinical entries issued by you across the blockchain network.</p>
+        </motion.header>
 
-      <div className="records-grid">
-        {filteredRecords.length > 0 ? (
-          filteredRecords.map(record => (
-            <div key={record.recordId || Math.random()} className="record-list-item">
-              <div className="record-type-icon">
-                {getIcon(record.recordType)}
-              </div>
-              
-              <div className="record-info-main">
-                <span className="record-title">{record.description || 'Untitled Record'}</span>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <span className={`record-type-badge type-${(record.recordType || 'note').toLowerCase().substring(0,3)}`}>
-                    {record.recordType || 'NOTE'}
-                  </span>
-                  <span className="record-meta" style={{ fontFamily: 'var(--font-mono)' }}>TX_{(record.recordId || 'unknown').substring(0,8)}</span>
-                </div>
-              </div>
+        <motion.div 
+          className="record-controls"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="filter-group">
+            {['all', 'lab', 'imaging', 'prescription', 'consultation'].map(t => (
+              <motion.button 
+                key={t}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`tab-btn ${filter === t ? 'active' : ''}`}
+                style={{ fontSize: '0.6rem', padding: '0.5rem 1rem' }}
+                onClick={() => setFilter(t)}
+              >
+                {t.toUpperCase()}
+              </motion.button>
+            ))}
+          </div>
 
-              <div className="record-physician">
-                <UserIcon size={14} className="text-cyan" />
-                <span>Patient: {record.patientId || 'Unknown'}</span>
-              </div>
-
-              <div className="record-date">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CalendarIcon size={14} className="text-dim" />
-                  <span>{record.createdAt ? new Date(record.createdAt).toLocaleDateString() : 'unknown'}</span>
-                </div>
-              </div>
-
-              <div className="record-actions">
-                <button 
-                  className="icon-btn" 
-                  title="View Source"
-                  onClick={() => {
-                    const url = record.metadata?.ipfsUrl || `${IPFS_GATEWAY}/${record.ipfsHash}`;
-                    window.open(url, '_blank');
-                  }}
-                >
-                  <Eye size={16} />
-                </button>
-                <button className="icon-btn" title="Download Verified Proof">
-                  <Download size={16} />
-                </button>
-              </div>
+          <div className="search-console" style={{ width: '400px', height: '44px' }}>
+            <input 
+              type="text" 
+              placeholder="Filter by description or Patient ID..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', padding: '0 1rem' }}>
+              <Search size={16} className="text-dim" />
             </div>
-          ))
-        ) : (
-          <div className="empty-state">
-            <Database size={48} className="text-dim" style={{ marginBottom: '1rem' }} />
-            <h3 style={{ fontWeight: 700, color: 'var(--text-primary)' }}>No Authored Records Found</h3>
-            <p className="text-dim">You have not issued any clinical records onto the blockchain ledger yet.</p>
           </div>
-        )}
-      </div>
+        </motion.div>
 
-      <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(255,255,255,0.01)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-thin)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <ShieldCheck size={24} className="text-cyan" />
-          <div>
-            <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-primary)' }}>Blockchain Attribution Verified</span>
-            <p className="text-dim" style={{ fontSize: '0.75rem' }}>Every record above is cryptographically signed and attributed to your clinical MSP identity.</p>
+        <motion.div 
+          className="records-grid"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {filteredRecords.length > 0 ? (
+            filteredRecords.map((record, idx) => (
+              <motion.div 
+                key={record.recordId || idx} 
+                className="record-list-item"
+                variants={item}
+                whileHover={{ x: 10, background: 'rgba(255,255,255,0.03)' }}
+              >
+                <div className="record-type-icon">
+                  {getIcon(record.recordType)}
+                </div>
+                
+                <div className="record-info-main">
+                  <span className="record-title">{record.description || 'Untitled Record'}</span>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                    <span className={`record-type-badge type-${(record.recordType || 'note').toLowerCase().substring(0,3)}`}>
+                      {record.recordType || 'NOTE'}
+                    </span>
+                    <span className="record-meta" style={{ fontFamily: 'var(--font-mono)' }}>TX_{(record.recordId || 'unknown').substring(0,8)}</span>
+                  </div>
+                </div>
+
+                <div className="record-physician">
+                  <UserIcon size={14} className="text-cyan" />
+                  <span>Patient: {record.patientId || 'Unknown'}</span>
+                </div>
+
+                <div className="record-date">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <CalendarIcon size={14} className="text-dim" />
+                    <span>{record.createdAt ? new Date(record.createdAt).toLocaleDateString() : 'unknown'}</span>
+                  </div>
+                </div>
+
+                <div className="record-actions">
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="icon-btn" 
+                    title="View Source"
+                    onClick={() => {
+                      const url = record.metadata?.ipfsUrl || `${IPFS_GATEWAY}/${record.ipfsHash}`;
+                      window.open(url, '_blank');
+                    }}
+                  >
+                    <Eye size={16} />
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="icon-btn" 
+                    title="Download Verified Proof"
+                  >
+                    <Download size={16} />
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              className="empty-state"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Database size={48} className="text-dim" style={{ marginBottom: '1rem' }} />
+              <h3 style={{ fontWeight: 700, color: 'var(--text-primary)' }}>No Authored Records Found</h3>
+              <p className="text-dim">You have not issued any clinical records onto the blockchain ledger yet.</p>
+            </motion.div>
+          )}
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8 }}
+          style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(255,255,255,0.01)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-thin)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <ShieldCheck size={24} className="text-cyan" />
+            <div>
+              <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-primary)' }}>Blockchain Attribution Verified</span>
+              <p className="text-dim" style={{ fontSize: '0.75rem' }}>Every record above is cryptographically signed and attributed to your clinical MSP identity.</p>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
 export default DoctorRecords;
+
