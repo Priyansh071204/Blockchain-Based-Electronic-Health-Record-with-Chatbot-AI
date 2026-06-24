@@ -2,7 +2,7 @@
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const logger = require('../config/logger');
 const { submitTransaction } = require('../config/fabric');
 
@@ -60,11 +60,13 @@ function sanitize(u) {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 async function register(data) {
+  await seedPromise;
+
   const { email, password, role, entityId, name } = data;
   if ([...users.values()].find(u => u.email === email))
     throw Object.assign(new Error('Email already registered'), { status: 409 });
 
-  const id = uuidv4();
+  const id = randomUUID();
   const passwordHash = await bcrypt.hash(password, 12);
   const user = {
     id, email, passwordHash, role,
@@ -108,6 +110,8 @@ async function register(data) {
 }
 
 async function login({ email, password }) {
+  await seedPromise;
+
   const user = [...users.values()].find(u => u.email === email);
   if (!user) throw Object.assign(new Error('Invalid credentials'), { status: 401 });
   if (!user.active) throw Object.assign(new Error('Account deactivated'), { status: 403 });
@@ -119,6 +123,8 @@ async function login({ email, password }) {
 }
 
 async function refresh(refreshToken) {
+  await seedPromise;
+
   let decoded;
   try { decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET); }
   catch { throw Object.assign(new Error('Invalid refresh token'), { status: 401 }); }

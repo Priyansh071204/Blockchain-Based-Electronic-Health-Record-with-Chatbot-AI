@@ -69,36 +69,35 @@ const DoctorDashboard: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="dashboard-page">
+      <div className="dashboard-page doctor-friendly-page">
         <motion.header 
+          className="doctor-hero"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <span className="badge-lume pulse-lume" style={{ color: '#10b981' }}>Verified Practitioner</span>
-              <span className="metric-label" style={{ color: 'var(--text-dim)', letterSpacing: '0.2em' }}>
-                DR. {user?.name?.toUpperCase() || 'SYSTEM'} • LICENSE_VERIFIED
-              </span>
+            <div className="doctor-hero-meta">
+              <span className="care-pill care-pill-success pulse-lume">Verified doctor</span>
+              <span className="doctor-eyebrow">{user?.name ? `Dr. ${user.name}` : 'Care workspace'}</span>
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Clinical <span className="text-cyan">Console</span></h1>
-            <p className="text-dim">Real-time patient triage and ledger-backed medical history.</p>
+            <h1>Today's patient workspace</h1>
+            <p className="text-dim">Find patients quickly, review their status, and create care notes without digging through technical details.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div className="doctor-hero-actions">
             <motion.button 
               className="btn-lume" 
               onClick={() => navigate('/doctor/records/new')}
+              type="button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <PlusCircle size={16} />
-              <span>New Consultation</span>
+              <span>New note</span>
             </motion.button>
           </div>
         </motion.header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
+        <div className="doctor-grid">
           {/* Analytics & Triage Stats */}
           <motion.div 
             className="analytics-panel"
@@ -118,9 +117,9 @@ const DoctorDashboard: React.FC = () => {
                 e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
               }}
             >
-              <span className="metric-label">Queue Distribution</span>
+              <span className="metric-label">Patient mix</span>
               <div className="chart-container" style={{ height: '220px', marginTop: '1rem' }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={100}>
                   <PieChart>
                     <Pie
                       data={triageDistribution}
@@ -143,26 +142,25 @@ const DoctorDashboard: React.FC = () => {
               
               <div className="queue-stats">
                 <div className="queue-stat-item">
-                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Avg Waiting</span>
+                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Average wait</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.875rem' }}>12.5m</span>
                 </div>
                 <div className="queue-stat-item">
-                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Urgent Cases</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#ef4444' }}>2 Active</span>
+                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Needs attention</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#ef4444' }}>2 active</span>
                 </div>
               </div>
             </motion.div>
 
             <motion.div 
-              className="lume-panel" 
-              style={{ padding: '1.5rem', marginTop: '2rem' }}
+              className="lume-panel doctor-status-card"
               variants={item}
               whileHover={{ scale: 1.02 }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Peer Node</span>
-                  <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>Fabric-Dr-01</div>
+                  <span className="metric-label" style={{ fontSize: '0.55rem' }}>Care team status</span>
+                  <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>Ready for appointments</div>
                 </div>
                 <div className="metric-icon-box" style={{ color: 'var(--lume-cyan)', borderColor: 'var(--lume-cyan)' }}>
                   <Stethoscope size={18} />
@@ -170,13 +168,13 @@ const DoctorDashboard: React.FC = () => {
               </div>
               <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 <div className="pulse-dot"></div>
-                Channel Sync Active
+                Patient data synced
               </div>
             </motion.div>
           </motion.div>
 
           {/* Patient Triage Terminal */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="doctor-main-stack">
             <motion.div 
               className="search-console"
               initial={{ opacity: 0, y: 10 }}
@@ -187,7 +185,7 @@ const DoctorDashboard: React.FC = () => {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Query patient identity or clinical identifier..."
+                  placeholder="Search patient name or ID..."
                 />
                 <div style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', borderLeft: '1px solid var(--border-thin)' }}>
                   <Filter size={18} className="text-dim" />
@@ -200,11 +198,11 @@ const DoctorDashboard: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <header style={{ padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid var(--border-thin)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="metric-label">Active Patient Triage</span>
+              <header className="doctor-panel-heading">
+                <span className="metric-label">My patients</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span className="pulse-dot"></span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-dim)' }}>BLOCK: 4120</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-dim)' }}>Updated now</span>
                 </div>
               </header>
 
@@ -212,17 +210,24 @@ const DoctorDashboard: React.FC = () => {
                 <table className="triage-table">
                   <thead>
                     <tr>
-                      <th>Identity Hash</th>
-                      <th>Subject Name</th>
-                      <th>Priority</th>
-                      <th>Wait Delta</th>
+                      <th>Patient ID</th>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Last update</th>
                       <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
+                    {filteredTriage.length === 0 && (
+                      <tr>
+                        <td colSpan={5}>
+                          <div className="empty-state-row">No patients match this search. Clear the filter or check assigned patients later.</div>
+                        </td>
+                      </tr>
+                    )}
                     {filteredTriage.map((p, i) => (
                       <motion.tr 
-                        key={p.id} 
+                        key={p.id || p.patientId || p.email || `patient-${i}`} 
                         className="triage-row"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -235,7 +240,7 @@ const DoctorDashboard: React.FC = () => {
                         </td>
                         <td>
                           <span className={`badge-status ${p.verified ? 'session' : 'waiting'}`}>
-                            {p.verified ? 'AUTHORIZED' : 'PENDING'}
+                            {p.verified ? 'Ready' : 'Pending'}
                           </span>
                         </td>
                         <td>
@@ -248,19 +253,21 @@ const DoctorDashboard: React.FC = () => {
                           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                             <motion.button 
                               className="btn-action" 
-                              title="Commit Record"
+                              title="Add care note"
                               whileHover={{ scale: 1.1, color: 'var(--lume-cyan)' }}
                               whileTap={{ scale: 0.9 }}
-                              onClick={() => navigate('/doctor/records/new', { state: { patientId: p.id } })}
+                              onClick={() => navigate('/doctor/records/new', { state: { patientId: p.patientId || p.id } })}
+                              type="button"
                             >
                               <SquarePlus size={16} />
                             </motion.button>
                             <motion.button 
                               className="btn-action" 
-                              title="Audit History"
+                              title="View history"
                               whileHover={{ scale: 1.1, color: 'var(--lume-cyan)' }}
                               whileTap={{ scale: 0.9 }}
-                              onClick={() => navigate(`/doctor/records`, { state: { patientId: p.patientId } })}
+                              onClick={() => navigate('/doctor/records', { state: { patientId: p.patientId || p.id } })}
+                              type="button"
                             >
                               <HistoryIcon size={16} />
                             </motion.button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEHR } from '../hooks/useEHR';
 import PageTransition from '../components/PageTransition';
 import { 
@@ -131,7 +131,7 @@ const HealthVitals: React.FC = () => {
             </header>
             
             <div style={{ height: '300px', width: '100%' }}>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={100}>
                 <AreaChart data={vitals}>
                   <defs>
                     <linearGradient id="colorHR" x1="0" y1="0" x2="0" y2="1">

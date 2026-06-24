@@ -48,6 +48,26 @@ app.use(morgan('combined', { stream: { write: m => logger.info(m.trim()) } }));
 // ── Static uploads ────────────────────────────────────────────────────────────
 app.use('/uploads', express.static(path.resolve('./uploads')));
 
+// ── API index ─────────────────────────────────────────────────────────────────
+app.get('/', (req, res) =>
+  res.json({
+    status: 'ok',
+    service: 'EHR API',
+    version: '1.0.0',
+    health: '/health',
+    api: {
+      auth: '/api/auth',
+      patients: '/api/patients',
+      doctors: '/api/doctors',
+      records: '/api/records',
+      prescriptions: '/api/prescriptions',
+      admin: '/api/admin',
+    },
+  })
+);
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (req, res) =>
   res.json({ status: 'ok', service: 'EHR API', version: '1.0.0', ts: new Date().toISOString() })

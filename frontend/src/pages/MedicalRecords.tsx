@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEHR } from '../hooks/useEHR';
 import PageTransition from '../components/PageTransition';
 import { 
@@ -23,6 +23,16 @@ const MedicalRecords: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const getIpfsUrl = (record: any) => {
+    const directUrl = record?.ipfsUrl;
+    if (typeof directUrl === 'string' && directUrl.trim()) return directUrl;
+
+    const metadataUrl = record?.metadata?.ipfsUrl;
+    if (typeof metadataUrl === 'string' && metadataUrl.trim()) return metadataUrl;
+
+    return null;
+  };
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -196,8 +206,12 @@ const MedicalRecords: React.FC = () => {
                     className="icon-btn" 
                     title="View Source"
                     onClick={() => {
-                      if (record.ipfsUrl) window.open(record.ipfsUrl, '_blank');
-                      else alert('IPFS source link unavailable for this entry.');
+                      const url = getIpfsUrl(record);
+                      if (url) {
+                        window.open(url, '_blank');
+                      } else {
+                        alert('IPFS source link unavailable for this entry.');
+                      }
                     }}
                   >
                     <Eye size={16} />

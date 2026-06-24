@@ -38,7 +38,7 @@ kill-backend: ## Kill any process running on backend port 4000
 	@lsof -t -i :4000 | xargs kill -9 2>/dev/null || true
 
 dev-frontend: ## Start frontend only
-	cd $(FRONTEND_DIR) && npm start
+	cd $(FRONTEND_DIR) && npm run dev
 
 # ── IPFS Only ─────────────────────────────────────────────────────────────────
 ipfs-up: ## Start IPFS node via Docker

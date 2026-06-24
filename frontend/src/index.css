@@ -45,6 +45,39 @@
   --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+
+[data-theme="light"] {
+  --bg-deep: #f6f8fb;
+  --bg-surface: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-elevated: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-dim: #64748b;
+  --lume-cyan: #007d8a;
+  --lume-cyan-glow: rgba(0, 125, 138, 0.18);
+  --lume-violet: #7c3aed;
+  --lume-violet-glow: rgba(124, 58, 237, 0.16);
+  --border-thin: rgba(15, 23, 42, 0.1);
+  --border-glow: rgba(0, 125, 138, 0.18);
+  --border-lume: rgba(15, 23, 42, 0.16);
+  --shadow-lume: 0 0 20px -10px var(--lume-cyan-glow);
+  --shadow-flat: 0 12px 28px -18px rgba(15, 23, 42, 0.28);
+  --shadow-deep: 0 20px 40px -24px rgba(15, 23, 42, 0.32);
+}
+
+[data-theme="light"] body::after {
+  background: radial-gradient(circle at 50% 50%, transparent, rgba(246, 248, 251, 0.94) 80%);
+}
+
+[data-theme="light"] .lume-panel {
+  background: rgba(255, 255, 255, 0.86);
+}
+
+[data-theme="light"] .lume-panel:hover {
+  background: rgba(255, 255, 255, 0.94);
+}
+
 /* Base Overrides */
 * {
   margin: 0; padding: 0; box-sizing: border-box;

@@ -22,25 +22,52 @@ import './Layout.css';
 const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
-  const [isDarkMode, setIsDarkMode] = useState(
-    document.documentElement.getAttribute('data-theme') === 'dark'
-  );
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme || document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  });
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'record-sync',
+      title: 'Ledger sync complete',
+      message: 'Latest record activity has been verified on the mock Fabric network.',
+      time: 'Just now',
+      unread: true,
+    },
+    {
+      id: 'security-review',
+      title: 'Security monitor active',
+      message: 'Access policies and role checks are running normally.',
+      time: '8 min ago',
+      unread: true,
+    },
+  ]);
   const navigate = useNavigate();
+  const unreadCount = notifications.filter((notification) => notification.unread).length;
 
   const toggleTheme = () => {
-    const newTheme = !isDarkMode ? 'dark' : 'light';
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
+    setIsDarkMode((current) => {
+      const newTheme = current ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      return !current;
+    });
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen((current) => !current);
+    setNotifications((current) => current.map((notification) => ({ ...notification, unread: false })));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+    setIsNotificationsOpen(false);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === 'dark');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  }, []);
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   const getNavItems = () => {
     if (!user) return [];
@@ -98,7 +125,7 @@ const Layout: React.FC = () => {
                 animate={{ opacity: 1 }}
                 className="logo-text"
               >
-                EHR <span className="text-cyan">BLOCKCHAIN</span>
+                MedChain <span className="text-cyan">EHR</span>
               </motion.span>
             )}
           </motion.div>
@@ -113,7 +140,7 @@ const Layout: React.FC = () => {
                   exit={{ opacity: 0, x: -10 }}
                   className="profile-info"
                 >
-                  <span className="msp-label">MSP Verified</span>
+                  <span className="msp-label">Signed in</span>
                   <span className="user-id font-mono">{user?.email}</span>
                   <span className={`badge-tech success mt-1 role-${user?.role}`}>{user?.role}</span>
                 </motion.div>
@@ -154,7 +181,7 @@ const Layout: React.FC = () => {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="version-tag">PROTOCOL v0.5.0</div>
+          <div className="version-tag">MedChain workspace</div>
           <div className="node-status scanline">
             <span className="status-dot"></span>
             {isSidebarOpen && (
@@ -162,7 +189,7 @@ const Layout: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
-                NETWORK ONLINE
+                System online
               </motion.span>
             )}
           </div>
@@ -183,7 +210,7 @@ const Layout: React.FC = () => {
             </motion.button>
             <div className="search-premium">
               <Search className="search-icon" size={14} />
-              <input type="text" placeholder="Protocol query..." />
+              <input type="text" placeholder="Search patients, doctors, records..." />
             </div>
           </div>
           
@@ -193,18 +220,65 @@ const Layout: React.FC = () => {
               whileTap={{ scale: 0.9 }}
               className="icon-btn" 
               onClick={toggleTheme}
+              type="button"
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-pressed={!isDarkMode}
             >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </motion.button>
             
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="icon-btn bell-btn"
-            >
-              <Bell size={18} />
-              <span className="badge-count">2</span>
-            </motion.button>
+            <div className="notification-menu">
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`icon-btn bell-btn ${isNotificationsOpen ? 'active' : ''}`}
+                onClick={toggleNotifications}
+                type="button"
+                aria-label="Open notifications"
+                aria-expanded={isNotificationsOpen}
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && <span className="badge-count">{unreadCount}</span>}
+              </motion.button>
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div
+                    className="notification-panel"
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <div className="notification-header">
+                      <div>
+                        <span className="msp-label">Notifications</span>
+                        <strong>{notifications.length ? `${notifications.length} updates` : 'All clear'}</strong>
+                      </div>
+                      {notifications.length > 0 && (
+                        <button type="button" onClick={clearNotifications}>Clear</button>
+                      )}
+                    </div>
+
+                    <div className="notification-list">
+                      {notifications.length > 0 ? notifications.map((notification) => (
+                        <div className="notification-item" key={notification.id}>
+                          <span className="notification-dot" />
+                          <div>
+                            <strong>{notification.title}</strong>
+                            <p>{notification.message}</p>
+                            <time>{notification.time}</time>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="notification-empty">No new alerts.</div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <div className="user-avatar-trigger">
               <motion.div 

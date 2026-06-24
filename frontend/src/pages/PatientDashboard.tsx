@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEHR } from '../hooks/useEHR';
 import { useAuth } from '../context/AuthContext';
@@ -30,12 +31,13 @@ import './PatientDashboard.css';
 const PatientDashboard: React.FC = () => {
   const ehr = useEHR();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [records, setRecords] = useState<any[]>([]);
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [billing, setBilling] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
-  const [syncStatus, setSyncStatus] = useState({ status: 'LEDGER_VERIFIED', verified: true });
+  const [syncStatus, setSyncStatus] = useState({ status: 'Records protected', verified: true });
 
   const activityData = [
     { name: 'Mon', value: 2 },
@@ -73,23 +75,32 @@ const PatientDashboard: React.FC = () => {
       try {
         const res = await ehr.getFabricStatus();
         if (res.data.status === 'online' || res.data.status === 'mock') {
-          setSyncStatus({ status: 'LEDGER_VERIFIED', verified: true });
+          setSyncStatus({ status: 'Records protected', verified: true });
         } else {
-          setSyncStatus({ status: 'SYNC_PENDING', verified: false });
+          setSyncStatus({ status: 'Sync pending', verified: false });
         }
       } catch {
-        setSyncStatus({ status: 'NODE_OFFLINE', verified: false });
+        setSyncStatus({ status: 'Connection offline', verified: false });
       }
     }, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
+  const quickActions = [
+    { label: 'Records', icon: <Database size={20} />, link: '/patient/records' },
+    { label: 'Visits', icon: <Calendar size={20} />, link: '/profile' },
+    { label: 'History', icon: <History size={20} />, link: '/patient/records' },
+    { label: 'Vitals', icon: <Activity size={20} />, link: '/patient/vitals' },
+    { label: 'Billing', icon: <CreditCard size={20} />, link: '/profile' },
+    { label: 'Privacy', icon: <Lock size={20} />, link: '/profile' }
+  ];
+
   const stats = [
-    { label: 'Upcoming Appts', value: appointments.length, subtext: 'Next: Consultation', icon: <Calendar size={18} />, color: 'var(--lume-cyan)' },
-    { label: 'Active Rxs', value: prescriptions.length, subtext: 'Verified on Channel', icon: <Pill size={18} />, color: '#10b981' },
-    { label: 'Pending Labs', value: records.filter(r => r.recordType === 'Lab Result').length, subtext: 'Awaiting Endorsement', icon: <FlaskConical size={18} />, color: '#f59e0b' },
-    { label: 'Outstanding Bills', value: billing.length, subtext: 'Settled Accounts', icon: <CreditCard size={18} />, color: '#a855f7' }
+    { label: 'Appointments', value: appointments.length, subtext: 'Upcoming visits', icon: <Calendar size={18} />, color: 'var(--lume-cyan)' },
+    { label: 'Prescriptions', value: prescriptions.length, subtext: 'Active medicines', icon: <Pill size={18} />, color: '#10b981' },
+    { label: 'Lab results', value: records.filter(r => r.recordType === 'Lab Result').length, subtext: 'Ready to review', icon: <FlaskConical size={18} />, color: '#f59e0b' },
+    { label: 'Bills', value: billing.length, subtext: 'Billing items', icon: <CreditCard size={18} />, color: '#a855f7' }
   ];
 
   const container = {
@@ -109,33 +120,32 @@ const PatientDashboard: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="dashboard-page">
+      <div className="dashboard-page patient-friendly-page">
         <motion.header 
+          className="patient-hero"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <span className={`badge-lume ${syncStatus.verified ? 'pulse-lume' : ''}`} style={{ color: syncStatus.verified ? '#10b981' : '#f59e0b' }}>
+            <div className="patient-hero-meta">
+              <span className={`care-pill ${syncStatus.verified ? 'care-pill-success pulse-lume' : 'care-pill-warning'}`}>
                 {syncStatus.status}
               </span>
-              <span className="metric-label" style={{ color: 'var(--text-dim)', letterSpacing: '0.2em' }}>
-                SUBJECT: {user?.name?.toUpperCase() || 'ANONYMOUS'} • PHR_NODE_ACTIVE
-              </span>
+              <span className="patient-eyebrow">{user?.name ? `Hi, ${user.name}` : 'Your health workspace'}</span>
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Health <span className="text-cyan">Vault</span></h1>
-            <p className="text-dim">Real-time ledger overview and biometric data synchronization.</p>
+            <h1>Your health dashboard</h1>
+            <p className="text-dim">See appointments, prescriptions, records, and security activity in one simple place.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div className="patient-hero-actions">
             <motion.button 
               className="btn-lume" 
               onClick={fetchDashboard}
+              type="button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <RefreshCcw size={14} />
-              <span>Sync Protocol</span>
+              <span>Refresh</span>
             </motion.button>
           </div>
         </motion.header>
@@ -143,7 +153,6 @@ const PatientDashboard: React.FC = () => {
         {/* Summary Metrics */}
         <motion.div 
           className="metrics-row" 
-          style={{ marginBottom: '2.5rem' }}
           variants={container}
           initial="hidden"
           animate="show"
@@ -176,28 +185,27 @@ const PatientDashboard: React.FC = () => {
           ))}
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+        <div className="patient-dashboard-grid">
           {/* Biometric Pulse */}
           <motion.div 
-            className="lume-panel" 
-            style={{ padding: '2rem' }}
+            className="lume-panel patient-main-panel"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header className="patient-panel-heading">
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Biometric Activity Pulse</h3>
-                <p className="text-dim" style={{ fontSize: '0.75rem' }}>Cross-Node Activity Synchronization</p>
+                <h3>Weekly record activity</h3>
+                <p className="text-dim">A quick view of updates made to your health information.</p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <span className="badge-lume" style={{ fontSize: '10px' }}>7_DAY_EPOCH</span>
-                <span className="badge-lume pulse-lume" style={{ fontSize: '10px', color: '#10b981' }}>REAL_TIME</span>
+                <span className="badge-lume" style={{ fontSize: '10px' }}>7 days</span>
+                <span className="badge-lume pulse-lume" style={{ fontSize: '10px', color: '#10b981' }}>Live</span>
               </div>
             </header>
             
             <div className="chart-container">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={100}>
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="colorPulse" x1="0" y1="0" x2="0" y2="1">
@@ -218,7 +226,7 @@ const PatientDashboard: React.FC = () => {
             </div>
             
             <div style={{ marginTop: '2.5rem' }}>
-              <span className="metric-label" style={{ marginBottom: '1rem', display: 'block' }}>Identity Access Logs</span>
+              <span className="metric-label" style={{ marginBottom: '1rem', display: 'block' }}>Who accessed your records</span>
               <div className="ledger-events">
                 {auditLogs.length > 0 ? auditLogs.slice(0, 5).map((log, index) => (
                   <motion.div 
@@ -231,12 +239,12 @@ const PatientDashboard: React.FC = () => {
                     <Fingerprint className="text-dim" size={16} />
                     <div className="log-meta">
                       <span className="log-title">{log.action || 'Ledger Update'}</span>
-                      <span className="log-action" style={{ fontSize: '0.65rem' }}>BY: {log.invoker || 'Identity_ID'}</span>
+                      <span className="log-action" style={{ fontSize: '0.65rem' }}>By {log.invoker || 'Care team'}</span>
                     </div>
                     <span className="log-time" style={{ fontSize: '0.65rem' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
                   </motion.div>
                 )) : (
-                  <p className="text-dim" style={{ fontSize: '0.75rem', padding: '1rem' }}>No ledger events recorded.</p>
+                  <p className="text-dim" style={{ fontSize: '0.75rem', padding: '1rem' }}>No record activity yet.</p>
                 )}
               </div>
             </div>
@@ -244,32 +252,27 @@ const PatientDashboard: React.FC = () => {
 
           {/* Core Modules & Security */}
           <motion.div 
-            style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
+            className="patient-side-stack"
             variants={container}
             initial="hidden"
             animate="show"
           >
             <div>
-              <span className="metric-label" style={{ marginBottom: '1rem', display: 'block' }}>Medical Protocol Nodes</span>
+              <span className="metric-label" style={{ marginBottom: '1rem', display: 'block' }}>Quick actions</span>
               <div className="module-grid">
-                {[
-                  { label: 'Health Vault', icon: <Database size={20} /> },
-                  { label: 'Registry', icon: <Calendar size={20} /> },
-                  { label: 'Ciphers', icon: <History size={20} /> },
-                  { label: 'Bio Lab', icon: <Activity size={20} /> },
-                  { label: 'Ledger Pay', icon: <CreditCard size={20} /> },
-                  { label: 'ACL Manager', icon: <Lock size={20} /> }
-                ].map(function (module) {
+                {quickActions.map(function (module) {
                   return (
-                    <motion.div
+                    <motion.button
                       key={module.label}
+                      type="button"
                       className="module-card-lume"
                       variants={item}
                       whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.05)' }}
+                      onClick={() => navigate(module.link)}
                     >
                       <div className="module-icon">{module.icon}</div>
                       <span className="module-label">{module.label}</span>
-                    </motion.div>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -283,21 +286,21 @@ const PatientDashboard: React.FC = () => {
               transition={{ delay: 0.6 }}
             >
               <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="metric-label">Security Protocol</span>
+                <span className="metric-label">Privacy and security</span>
                 <ShieldAlert size={16} className="text-violet" />
               </header>
               <div className="ledger-health">
                 <div className="health-status-row">
-                  <span className="health-label">Identity Encryption</span>
+                  <span className="health-label">Record encryption</span>
                   <span className="health-value text-cyan">AES-256</span>
                 </div>
                 <div className="health-status-row">
-                  <span className="health-label">Signature Alg</span>
+                  <span className="health-label">Digital signature</span>
                   <span className="health-value text-violet">ECDSA</span>
                 </div>
                 <div className="health-status-row">
-                  <span className="health-label">Audit Probability</span>
-                  <span className="health-value" style={{ color: '#10b981' }}>0.0001%</span>
+                  <span className="health-label">Unauthorized access</span>
+                  <span className="health-value" style={{ color: '#10b981' }}>None found</span>
                 </div>
               </div>
               
@@ -305,9 +308,11 @@ const PatientDashboard: React.FC = () => {
                 className="icon-btn" 
                 style={{ width: '100%', marginTop: '2rem', height: '44px', gap: '0.5rem' }}
                 whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.1)' }}
+                onClick={() => navigate('/profile')}
+                type="button"
               >
                 <Lock size={14} />
-                <span className="metric-label">Rotate Access Keys</span>
+                <span className="metric-label">Manage privacy</span>
               </motion.button>
             </motion.div>
           </motion.div>

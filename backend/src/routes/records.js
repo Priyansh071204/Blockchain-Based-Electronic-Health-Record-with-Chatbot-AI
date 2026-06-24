@@ -2,7 +2,7 @@
 
 const router = require('express').Router();
 const { body, validationResult } = require('express-validator');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const { submitTransaction, evaluateTransaction } = require('../config/fabric');
 const { uploadToIPFS } = require('../services/ipfsService');
 const { authenticate, requireRole } = require('../middleware/auth');
@@ -28,7 +28,7 @@ router.post('/',
     try {
       const { patientId, recordType, description, metadata } = req.body;
       const doctorId = req.user.entityId;
-      const recordId = uuidv4();
+      const recordId = randomUUID();
 
       // Upload file or JSON metadata to IPFS
       let ipfsResult;

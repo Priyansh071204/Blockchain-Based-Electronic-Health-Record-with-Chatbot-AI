@@ -2,7 +2,7 @@
 
 const router = require('express').Router();
 const { body, validationResult } = require('express-validator');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const { submitTransaction, evaluateTransaction } = require('../config/fabric');
 const { authenticate, requireRole } = require('../middleware/auth');
 const logger = require('../config/logger');
@@ -28,7 +28,7 @@ router.post('/',
   async (req, res, next) => {
     try {
       const { patientId, medications, instructions, validUntil } = req.body;
-      const prescriptionId = uuidv4();
+      const prescriptionId = randomUUID();
       const doctorId = req.user.entityId;
 
       const r = await submitTransaction(

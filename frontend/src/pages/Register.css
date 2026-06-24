@@ -1,73 +1,9 @@
-.auth-page {
-  background: var(--bg-deep);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  min-height: 100vh;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 580px;
-  position: relative;
-  z-index: 10;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.logo-lume {
-  width: 56px;
-  height: 56px;
-  background: var(--bg-surface);
-  border: 1px solid var(--lume-cyan);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lume);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.25rem;
-  color: var(--lume-cyan);
-  transition: var(--transition-smooth);
-}
-
-.auth-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.auth-subtitle::before {
-  content: '';
-  width: 4px; height: 4px;
-  background: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 5px #10b981;
-  animation: pulse 2s infinite;
-}
+@import "./Login.css";
 
 .register-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 @media (max-width: 640px) {
@@ -80,77 +16,34 @@
   grid-column: 1 / -1;
 }
 
-.form-group {
-  margin-bottom: 0.5rem;
+/* Custom layout rules for select elements */
+.select-lume {
+  cursor: pointer;
+  background: rgba(2, 6, 23, 0.7) !important;
+  padding-right: 2.5rem !important;
 }
 
-.form-label {
-  display: block;
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-secondary);
-  margin-bottom: 0.4rem;
-  margin-left: 0.25rem;
+.select-lume option {
+  background: #0f172a;
+  color: #ffffff;
 }
 
-.input-lume {
-  font-size: 0.8125rem;
-}
-
-select.input-lume {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  padding-right: 2.5rem;
-}
-
-.error-lume {
-  grid-column: 1 / -1;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  padding: 0.75rem;
-  border-radius: var(--radius-md);
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.link-lume {
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--lume-cyan);
-  text-decoration: none;
+.select-arrow {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  pointer-events: none;
   transition: var(--transition-fast);
 }
 
-.auth-switch {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+.select-lume:focus ~ .select-arrow {
+  color: var(--lume-cyan);
 }
 
-.loading-line {
-  position: absolute;
-  top: 0; left: 0;
-  height: 1px;
-  background: var(--lume-cyan);
-  box-shadow: 0 0 10px var(--lume-cyan);
-  animation: loading-line 2s infinite ease-in-out;
-}
-
-@keyframes loading-line {
-  0% { left: 0; width: 0; }
-  50% { left: 0; width: 100%; }
-  100% { left: 100%; width: 0; }
-}
-
+/* Validation field errors */
 .field-error-text {
   display: block;
   font-family: var(--font-mono);
@@ -163,27 +56,6 @@ select.input-lume {
 }
 
 .input-lume.has-error {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.02);
-}
-
-.password-toggle-btn {
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition-fast);
-  z-index: 5;
-}
-
-.password-toggle-btn:hover {
-  color: var(--lume-cyan);
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  background: rgba(239, 68, 68, 0.02) !important;
 }

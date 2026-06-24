@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEHR } from '../hooks/useEHR';
 import PageTransition from '../components/PageTransition';
 import { 
-  Terminal, 
+  RefreshCw, 
   Settings, 
   ShieldCheck, 
   FileText, 
@@ -12,8 +12,10 @@ import {
   Clock, 
   Shield, 
   Cpu, 
-  AlertCircle,
-  Activity
+  CheckCircle2,
+  Activity,
+  UserCheck,
+  Users
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -61,10 +63,10 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const accessStats = [
-    { label: 'Total Records', value: '12.k', trend: '+12%', icon: <FileText size={18} />, up: true, accent: 'text-cyan' },
-    { label: 'Access Grants', value: '840', trend: '+5%', icon: <Key size={18} />, up: true, accent: 'text-violet' },
-    { label: 'Pending Requests', value: '18', trend: '-2%', icon: <Clock size={18} />, up: false, accent: 'text-red' },
-    { label: 'Verified Nodes', value: '4', trend: 'Stable', icon: <Shield size={18} />, up: true, accent: 'text-cyan' }
+    { label: 'Health Records', value: '12k', trend: '+12% this week', icon: <FileText size={18} />, up: true },
+    { label: 'Access Approvals', value: '840', trend: '+5% this week', icon: <Key size={18} />, up: true },
+    { label: 'Needs Review', value: '18', trend: '2 fewer today', icon: <Clock size={18} />, up: false },
+    { label: 'Trusted Nodes', value: networkMetrics.nodes.toString(), trend: 'All healthy', icon: <Shield size={18} />, up: true }
   ];
 
   const recentActivity = [
@@ -75,20 +77,21 @@ const AdminDashboard: React.FC = () => {
     { id: 4116, hash: '0x5c...d889', type: 'Policy Update', time: '5h ago', color: '#ef4444' }
   ];
 
+  const refreshDashboard = async () => {
+    try {
+      const [patientsRes, doctorsRes] = await Promise.all([
+        ehr.getAllPatients(),
+        ehr.getAllDoctors()
+      ]);
+      setPatients(patientsRes.data || []);
+      setDoctors(doctorsRes.data || []);
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+    }
+  };
+
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [patientsRes, doctorsRes] = await Promise.all([
-          ehr.getAllPatients(),
-          ehr.getAllDoctors()
-        ]);
-        setPatients(patientsRes.data || []);
-        setDoctors(doctorsRes.data || []);
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
-      }
-    };
-    fetchAll();
+    refreshDashboard();
 
     const interval = setInterval(() => {
       setNetworkMetrics(prev => ({
@@ -128,37 +131,40 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <PageTransition>
-      <div className="dashboard-page">
+      <div className="dashboard-page admin-friendly-page">
         <motion.header 
+          className="admin-hero"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <span className="badge-lume pulse-lume" style={{ color: '#10b981' }}>Network Online</span>
-              <span className="metric-label" style={{ color: 'var(--text-dim)', letterSpacing: '0.2em' }}>HYPERLEDGER_FABRIC_V2.5</span>
+            <div className="admin-hero-meta">
+              <span className="status-pill status-pill-success pulse-lume">System online</span>
+              <span className="admin-eyebrow">Admin workspace</span>
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Network <span className="text-cyan">Orchestrator</span></h1>
-            <p className="text-dim">Real-time ledger monitoring and MSP identity provisioning.</p>
+            <h1>Welcome back, admin</h1>
+            <p className="text-dim">Review doctors, monitor patient access, and keep the care network running smoothly.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div className="admin-hero-actions">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="icon-btn" 
-              style={{ width: 'auto', padding: '0 1rem', gap: '0.5rem' }}
+              className="admin-secondary-btn" 
+              onClick={refreshDashboard}
+              type="button"
             >
-              <Terminal size={14} />
-              <span className="metric-label">CLI</span>
+              <RefreshCw size={14} />
+              <span>Refresh</span>
             </motion.button>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn-lume"
+              onClick={() => navigate('/profile')}
+              type="button"
             >
               <Settings size={14} />
-              <span>Configure Node</span>
+              <span>Settings</span>
             </motion.button>
           </div>
         </motion.header>
@@ -166,7 +172,6 @@ const AdminDashboard: React.FC = () => {
         {/* Network Overview Cards */}
         <motion.div 
           className="metrics-row" 
-          style={{ marginBottom: '2.5rem' }}
           variants={container}
           initial="hidden"
           animate="show"
@@ -194,34 +199,31 @@ const AdminDashboard: React.FC = () => {
               <div className="metric-value">{stat.value}</div>
               <div className="metric-trend">
                 <span style={{ color: stat.up ? '#10b981' : '#ef4444' }}>
-                  {stat.up ? '↑' : '↓'} {stat.trend}
+                  {stat.up ? 'Good' : 'Review'} · {stat.trend}
                 </span>
-                <span className="metric-label" style={{ fontSize: '0.55rem' }}>Vs Epoch</span>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem' }}>
+        <div className="admin-grid">
           {/* Ledger Pulse Chart */}
           <motion.div 
-            className="lume-panel" 
-            style={{ gridColumn: 'span 2', padding: '2rem' }}
+            className="lume-panel admin-main-panel"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header className="panel-heading">
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Ledger Pulse</h3>
-                <p className="text-dim" style={{ fontSize: '0.75rem' }}>Transaction throughput throughout the channel</p>
+                <h3>Activity overview</h3>
+                <p className="text-dim">Records, approvals, and access changes across the network.</p>
               </div>
-              <div style={{ padding: '0.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.25rem' }}>
+              <div className="time-segment">
                 {['1H', '24H', '7D'].map(t => (
                   <button 
                     key={t}
-                    className="tab-btn"
-                    style={{ padding: '0.4rem 0.75rem', fontSize: '10px', minWidth: '40px', background: t === '24H' ? 'var(--bg-panel)' : 'transparent', color: t === '24H' ? 'var(--lume-cyan)' : 'var(--text-dim)' }}
+                    className={`time-segment-btn ${t === '24H' ? 'active' : ''}`}
                   >
                     {t}
                   </button>
@@ -230,7 +232,7 @@ const AdminDashboard: React.FC = () => {
             </header>
             
             <div className="chart-container">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={100}>
                 <AreaChart data={transactionData}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -255,13 +257,15 @@ const AdminDashboard: React.FC = () => {
                 className={`tab-btn ${activeTab === 'doctors' ? 'active' : ''}`}
                 onClick={() => navigate('/admin/doctors')}
               >
-                Doctor Verification
+                <UserCheck size={16} />
+                Doctors
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'patients' ? 'active' : ''}`}
                 onClick={() => navigate('/admin/patients')}
               >
-                Patient Registry
+                <Users size={16} />
+                Patients
               </button>
             </div>
 
@@ -269,8 +273,8 @@ const AdminDashboard: React.FC = () => {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>MSP_IDENTITY</th>
-                    <th>Subject</th>
+                    <th>ID</th>
+                    <th>Name</th>
                     <th>Status</th>
                     <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
@@ -280,6 +284,20 @@ const AdminDashboard: React.FC = () => {
                   initial="hidden"
                   animate="show"
                 >
+                  {activeTab === 'doctors' && doctors.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>
+                        <div className="empty-state-row">No doctors found. New registrations will appear here for approval.</div>
+                      </td>
+                    </tr>
+                  )}
+                  {activeTab === 'patients' && patients.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>
+                        <div className="empty-state-row">No patients found yet. Registered patients will appear here.</div>
+                      </td>
+                    </tr>
+                  )}
                   {activeTab === 'doctors' ? doctors.map((d: any) => (
                     <motion.tr key={d._id || d.id || d.doctorId} variants={item}>
                       <td><span className="id-badge">{(d._id || d.id || d.doctorId || '').substring(0,8)}</span></td>
@@ -290,8 +308,8 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       </td>
                       <td>
-                        <span className="badge-lume" style={{ color: d.verified ? '#10b981' : '#f59e0b', border: 'none', background: 'rgba(255,255,255,0.03)' }}>
-                          {d.verified ? 'AUTHORIZED' : 'PENDING_SIG'}
+                        <span className={`friendly-status ${d.verified ? 'success' : 'warning'}`}>
+                          {d.verified ? 'Verified' : 'Needs approval'}
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
@@ -300,15 +318,14 @@ const AdminDashboard: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="btn-lume" 
-                            style={{ padding: '0.4rem 0.75rem', fontSize: '10px' }} 
+                            style={{ padding: '0.45rem 0.8rem', fontSize: '0.72rem' }} 
                             onClick={() => verifyDoctor(d._id || d.id || d.doctorId)}
+                            type="button"
                           >
-                            SIGN & VERIFY
+                            Approve
                           </motion.button>
                         ) : (
-                          <div className="icon-btn" style={{ display: 'inline-flex' }}>
-                            <AlertCircle size={14} />
-                          </div>
+                          <span className="verified-check"><CheckCircle2 size={16} /> Complete</span>
                         )}
                       </td>
                     </motion.tr>
@@ -321,9 +338,9 @@ const AdminDashboard: React.FC = () => {
                           <span className="text-dim" style={{ fontSize: '0.7rem' }}>{p.email}</span>
                         </div>
                       </td>
-                      <td><span className="badge-lume" style={{ color: '#10b981' }}>INDEXED</span></td>
+                      <td><span className="friendly-status success">Active</span></td>
                       <td style={{ textAlign: 'right' }}>
-                        <div className="icon-btn" style={{ display: 'inline-flex' }}>
+                        <div className="icon-btn table-icon" style={{ display: 'inline-flex' }}>
                           <ShieldCheck size={14} />
                         </div>
                       </td>
@@ -335,39 +352,41 @@ const AdminDashboard: React.FC = () => {
           </motion.div>
 
           {/* Right Sidebar: Health & Activity */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="admin-side-stack">
             <motion.div 
-              className="lume-panel" 
-              style={{ padding: '1.5rem' }}
+              className="lume-panel admin-side-panel"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="metric-label">Ledger Health</span>
+              <header className="side-panel-heading">
+                <div>
+                  <span className="metric-label">Network health</span>
+                  <h3>Everything looks good</h3>
+                </div>
                 <Activity size={16} className="text-cyan" />
               </header>
               <div className="ledger-health">
                 <div className="health-status-row">
-                  <span className="health-label">Block Height</span>
+                  <span className="health-label">Latest block</span>
                   <span className="health-value text-cyan">{networkMetrics.blocks}</span>
                 </div>
                 <div className="health-status-row">
-                  <span className="health-label">Channel Latency</span>
+                  <span className="health-label">Response time</span>
                   <span className="health-value" style={{ color: parseInt(networkMetrics.latency) < 30 ? '#10b981' : '#f59e0b' }}>
                     {networkMetrics.latency}
                   </span>
                 </div>
                 <div className="health-status-row">
-                  <span className="health-label">Peer Uptime</span>
+                  <span className="health-label">Uptime</span>
                   <span className="health-value" style={{ color: '#10b981' }}>{networkMetrics.uptime}</span>
                 </div>
                 
-                <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-thin)' }}>
-                  <div className="metric-label" style={{ fontSize: '0.55rem', marginBottom: '0.5rem' }}>Protocol Status</div>
+                <div className="care-status-card">
+                  <div className="metric-label" style={{ fontSize: '0.55rem', marginBottom: '0.5rem' }}>Security status</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <ShieldCheck size={14} style={{ color: '#10b981' }} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>X.509 MSP Active</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>Verified identity checks active</span>
                   </div>
                 </div>
               </div>
@@ -375,13 +394,16 @@ const AdminDashboard: React.FC = () => {
 
             <motion.div 
               className="lume-panel scanline" 
-              style={{ padding: '1.5rem', flex: 1 }}
+              style={{ flex: 1 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <header style={{ marginBottom: '1.5rem' }}>
-                <span className="metric-label">Recent Ledger Events</span>
+              <header className="side-panel-heading">
+                <div>
+                  <span className="metric-label">Recent activity</span>
+                  <h3>Latest updates</h3>
+                </div>
               </header>
               <div className="ledger-events">
                 {recentActivity.map((event, idx) => (
@@ -409,9 +431,11 @@ const AdminDashboard: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 className="icon-btn" 
                 style={{ width: '100%', marginTop: '2rem', height: '44px', gap: '0.5rem' }}
+                onClick={() => navigate('/admin/patients')}
+                type="button"
               >
                 <Cpu size={14} />
-                <span className="metric-label">Explore Blocks</span>
+                <span className="metric-label">View details</span>
               </motion.button>
             </motion.div>
           </div>
