@@ -62,6 +62,7 @@ app.get('/', (req, res) =>
       records: '/api/records',
       prescriptions: '/api/prescriptions',
       admin: '/api/admin',
+      chat: '/api/chat',
     },
   })
 );
@@ -82,6 +83,7 @@ app.use('/api/prescriptions', require('./routes/prescriptions'));
 app.use('/api/admin',         require('./routes/admin'));
 app.use('/api/fabric',        require('./routes/fabric'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/chat',          require('./routes/chat'));
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

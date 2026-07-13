@@ -24,12 +24,17 @@ const MedicalRecords: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const IPFS_GATEWAY = 'http://localhost:8080/ipfs';
+
   const getIpfsUrl = (record: any) => {
     const directUrl = record?.ipfsUrl;
     if (typeof directUrl === 'string' && directUrl.trim()) return directUrl;
 
     const metadataUrl = record?.metadata?.ipfsUrl;
     if (typeof metadataUrl === 'string' && metadataUrl.trim()) return metadataUrl;
+
+    const hash = record?.ipfsHash;
+    if (typeof hash === 'string' && hash.trim()) return `${IPFS_GATEWAY}/${hash}`;
 
     return null;
   };

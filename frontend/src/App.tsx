@@ -16,6 +16,7 @@ import DoctorRecords from './pages/DoctorRecords';
 import HealthVitals from './pages/HealthVitals';
 import NewRecord from './pages/NewRecord';
 import Profile from './pages/Profile';
+import ReportChatbot from './pages/ReportChatbot';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
               <Route path="/patient" element={<PatientDashboard />} />
               <Route path="/patient/records" element={<MedicalRecords />} />
               <Route path="/patient/vitals" element={<HealthVitals />} />
+              <Route path="/patient/chat" element={<ReportChatbot />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
           </Route>

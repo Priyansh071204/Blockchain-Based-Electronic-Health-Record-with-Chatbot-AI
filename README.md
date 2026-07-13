@@ -516,3 +516,25 @@ MIT License — see [LICENSE](LICENSE)
 ---
 
 *Built with ❤️ using Hyperledger Fabric v2.4, Node.js, React, and IPFS*
+
+
+## Patient Report Chatbot
+
+The patient chatbot is fully responsive and supports querying both with and without an uploaded report:
+
+- **General Mode:** Ask general questions about EHR usage, privacy settings, billing, prescriptions, or doctor visits anytime without uploading any files.
+- **Report Mode:** Upload any `.pdf`, `.docx`, or `.txt` health report to automatically generate a summary and ask questions based specifically on the report's text.
+- **Features:** 
+  - **Mobile Responsive:** Modern layout optimized for desktop and mobile, ensuring the input fields and buttons stay inline.
+  - **Auto-Scrolling:** Smooth auto-scrolling to keep active chat content centered and in focus.
+  - **Smart Fallback:** Instantly falls back to local semantic rule-matching or general assistant logic if no report is present or the API is offline.
+  - **OpenAI Integration:** Set `OPENAI_API_KEY` in `backend/.env` to swap fallback logic for real-time generative responses.
+
+Example backend settings:
+
+```env
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+Uploaded report text is processed server-side. Do not place OpenAI API keys in frontend files.

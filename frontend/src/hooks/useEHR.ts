@@ -44,6 +44,12 @@ const ehrService = {
 
   // ── Utilities ──────────────────────────────────────────────────────────────
   getFabricStatus: () => axios.get(`${BASE_URL}/fabric/status`),
+
+  // ── Report Chatbot ─────────────────────────────────────────────────────────
+  getChatReport: () => axios.get(`${BASE_URL}/chat/report`),
+  uploadChatReport: (formData: FormData) => axios.post(`${BASE_URL}/chat/report`, formData),
+  askChatQuestion: (question: string) => axios.post(`${BASE_URL}/chat/ask`, { question }),
+  clearChatReport: () => axios.delete(`${BASE_URL}/chat/report`),
 };
 
 export const useEHR = () => {

@@ -15,7 +15,8 @@ import {
   LogOut, 
   Menu,
   Users,
-  Stethoscope
+  Stethoscope,
+  MessageCircle
 } from 'lucide-react';
 import './Layout.css';
 
@@ -92,6 +93,7 @@ const Layout: React.FC = () => {
         { label: 'Dashboard', link: '/patient', icon: <LayoutDashboard size={20} /> },
         { label: 'My Records', link: '/patient/records', icon: <ClipboardList size={20} /> },
         { label: 'My Vitals', link: '/patient/vitals', icon: <Activity size={20} /> },
+        { label: 'Report Chat', link: '/patient/chat', icon: <MessageCircle size={20} /> },
       ]
     };
 
