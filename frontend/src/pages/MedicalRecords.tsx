@@ -24,7 +24,7 @@ const MedicalRecords: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const IPFS_GATEWAY = 'http://localhost:8080/ipfs';
+  const IPFS_GATEWAY = import.meta.env.VITE_IPFS_GATEWAY || 'http://localhost:8080/ipfs';
 
   const getIpfsUrl = (record: any) => {
     const directUrl = record?.ipfsUrl;

@@ -54,8 +54,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:4000/api
-      - REACT_APP_IPFS_GATEWAY=http://localhost:8080/ipfs
+      - VITE_API_URL=http://localhost:4000/api
+      - VITE_IPFS_GATEWAY=http://localhost:8080/ipfs
     depends_on:
       - backend
     networks:

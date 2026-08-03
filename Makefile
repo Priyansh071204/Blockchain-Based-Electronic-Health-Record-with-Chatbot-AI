@@ -49,6 +49,13 @@ ipfs-up: ## Start IPFS node via Docker
 ipfs-down: ## Stop IPFS node
 	docker-compose stop ipfs
 
+# ── One-Command Automatic Deployment ──────────────────────────────────────────
+deploy: ## Deploy full production stack (Fabric + IPFS + Backend + Frontend)
+	./deploy.sh real
+
+deploy-mock: ## Deploy lightweight stack in mock mode (IPFS + Backend + Frontend)
+	./deploy.sh mock
+
 # ── Full Docker Stack (no Fabric) ─────────────────────────────────────────────
 docker-up: ## Start backend + frontend + IPFS via Docker
 	docker-compose up --build -d

@@ -1,6 +1,6 @@
-# 🏥 EHR Chain — Blockchain Based  Electronic Health Record System
+# 🏥 EHR Chain — Blockchain Based Electronic Health Record System
 
-A **production-grade**, patient-centric Electronic Health Record (EHR) system built on **Hyperledger Fabric v2.x**, with IPFS off-chain storage, JWT auth, and a modern **React (Vite + TypeScript)** dashboard.
+A **production-grade**, patient-centric Electronic Health Record (EHR) system built with smart contracts in **Solidity (`EHRContract.sol`)** and **Hyperledger Fabric v2.x (`ehrContract.js`)**, with IPFS off-chain storage, JWT authentication, and a modern **React (Vite + TypeScript)** dashboard.
 
 ---
 
@@ -14,20 +14,19 @@ A **production-grade**, patient-centric Electronic Health Record (EHR) system bu
                              │ HTTPS / REST
 ┌────────────────────────────▼────────────────────────────────────┐
 │                   Node.js + Express Backend                     │
-│    JWT Auth │ Rate Limiting │ File Upload │ Fabric SDK          │
+│    JWT Auth │ Rate Limiting │ File Upload │ Web3 / Fabric SDK   │
 └──────┬──────────────────────────────────────┬───────────────────┘
-       │ Fabric SDK (gRPC)                    │ HTTP
-┌──────▼──────────────────┐        ┌──────────▼──────────────────┐
-│  Hyperledger Fabric v2  │        │         IPFS Node           │
-│  ┌─────────────────┐    │        │   (off-chain doc storage)   │
-│  │  EHR Chaincode  │    │        └─────────────────────────────┘
-│  │  (Node.js)      │    │
-│  └─────────────────┘    │
-│  Channel: mychannel     │
-│  State DB: CouchDB      │
-│  CA: fabric-ca          │
-└─────────────────────────┘
+       │ Web3 / Fabric SDK                    │ HTTP
+┌──────▼──────────────────────────┐  ┌────────▼──────────────────┐
+│     Blockchain Smart Contracts  │  │         IPFS Node           │
+│  ┌───────────────────────────┐  │  │   (off-chain doc storage)   │
+│  │ EHR Contract (Solidity)   │  │  └─────────────────────────────┘
+│  │ EHR Chaincode (Node.js)   │  │
+│  └───────────────────────────┘  │
+│  State DB / EVM Ledger          │
+└─────────────────────────────────┘
 ```
+
 
 ---
 
@@ -35,11 +34,13 @@ A **production-grade**, patient-centric Electronic Health Record (EHR) system bu
 
 ```
 ehr-blockchain/
-├── chaincode/                    # Hyperledger Fabric Chaincode (Node.js)
-│   ├── index.js                  # Entry point
+├── chaincode/                    # Smart Contracts / Chaincode
+│   ├── index.js                  # Fabric entry point
 │   ├── package.json
-│   └── lib/
-│       └── ehrContract.js        # Smart contract (all 8 functions)
+│   ├── lib/
+│   │   └── ehrContract.js        # Fabric Node.js contract
+│   └── solidity/
+│       └── EHRContract.sol       # Solidity smart contract (EVM / Ethereum)
 │
 ├── backend/                      # Express REST API
 │   ├── src/
@@ -298,46 +299,102 @@ metadata     (JSON string, optional)
 
 ---
 
-## 🔐 Access Control Logic
+## 👥 Role-Based Access Control (RBAC)
 
-```
-Doctor requests patient record:
-  ┌─────────────────────────────────────────────────┐
-  │ IF authorizedDoctors[doctorId].exists            │
-  │   AND .active === true                           │
-  │   AND (.expiresAt === null OR .expiresAt > now)  │
-  │ THEN → ALLOW + log VIEW_RECORD                   │
-  │ ELSE → DENY  + log DENIED_VIEW_RECORD            │
-  └─────────────────────────────────────────────────┘
-```
+The system enforces strict multi-layered Role-Based Access Control (RBAC) across the React frontend, Node.js REST API middleware, and on-chain smart contracts (Hyperledger Fabric Chaincode & Solidity Smart Contract).
 
-Every action — allowed or denied — is logged immutably to the blockchain audit trail.
+### System Roles & Responsibilities
+
+| Role | Description | Key Permissions |
+|------|-------------|-----------------|
+| **`admin`** | System Administrator | Register/verify doctors, manage users, create billing records, view full system stats and query all records. |
+| **`patient`** | Patient / Data Owner | Self-register, view personal medical history/prescriptions, grant or revoke doctor access with optional expiration, view audit logs. |
+| **`doctor`** | Verified Medical Doctor | Register under admin verification, create health records and digital prescriptions for authorized patients, view authorized patient profiles. |
+| **`pharmacist`** | Registered Pharmacist | View prescriptions and dispense active digital prescriptions. |
 
 ---
 
-## 📦 Chaincode Functions
+### RBAC Permissions Matrix
 
-| Function                | Description                                    |
-|-------------------------|------------------------------------------------|
-| `initLedger`            | Initialize the ledger                          |
-| `registerPatient`       | Register a new patient                         |
-| `registerDoctor`        | Register a new doctor (admin only)             |
-| `grantDoctorAccess`     | Patient grants doctor access                   |
-| `revokeDoctorAccess`    | Patient revokes doctor access                  |
-| `createHealthRecord`    | Doctor creates record (access check enforced)  |
-| `getHealthRecord`       | Get a specific record (access check enforced)  |
-| `getPatientRecords`     | Get all records for a patient                  |
-| `createPrescription`    | Doctor writes prescription                     |
-| `dispensePrescription`  | Pharmacist dispenses prescription              |
-| `getPrescription`       | Get prescription details                       |
-| `getAuditTrail`         | Get full immutable audit log for entity        |
-| `getRecordHistory`      | Get Fabric native history for a record         |
-| `queryAllPatients`      | CouchDB rich query — all patients (admin)      |
-| `queryAllDoctors`       | CouchDB rich query — all doctors (admin)       |
-| `getDoctorPatients`     | Get authorized patient list for a doctor       |
-| `verifyDoctor`          | Admin verifies doctor credentials              |
+| Operations / Resources | Admin | Patient | Doctor | Pharmacist |
+|------------------------|:-----:|:-------:|:------:|:----------:|
+| Register Patient | ✅ | ✅ (self) | ❌ | ❌ |
+| Register Doctor | ✅ | ❌ | ❌ | ❌ |
+| Verify Doctor Credentials | ✅ | ❌ | ❌ | ❌ |
+| Grant / Revoke Doctor Access | ✅ | ✅ (own data) | ❌ | ❌ |
+| Create Health Record | ❌ | ❌ | ✅ (authorized) | ❌ |
+| View Health Record / History | ✅ | ✅ (own) | ✅ (authorized) | ❌ |
+| Issue Prescription | ❌ | ❌ | ✅ (authorized) | ❌ |
+| Dispense Prescription | ✅ | ❌ | ❌ | ✅ |
+| Create Billing / Appointments | ✅ | ❌ | ✅ (appts) | ❌ |
+| View Audit Trail | ✅ | ✅ (own) | ✅ (authorized) | ❌ |
 
 ---
+
+### 🔐 Access Control Logic & Smart Contract Enforcement
+
+Access to patient medical records is dynamically evaluated on-chain via patient-managed access delegation:
+
+```
+Doctor requests patient record / creates health record:
+  ┌─────────────────────────────────────────────────────────────┐
+  │ IF callerRole === "admin"                                  │
+  │   → ALLOW                                                   │
+  │ ELSE IF callerRole === "patient" AND callerId === patientId  │
+  │   → ALLOW                                                   │
+  │ ELSE IF callerRole === "doctor"                            │
+  │   IF patient.authorizedDoctors[doctorId].exists            │
+  │     AND access.active === true                              │
+  │     AND (access.expiresAt === 0 OR access.expiresAt > now)  │
+  │   → ALLOW + Log VIEW_RECORD / CREATE_RECORD on-chain        │
+  │   ELSE                                                      │
+  │   → DENY  + Log DENIED_VIEW_RECORD on-chain                 │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+#### Dual Enforcement:
+1. **API Middleware (`backend/src/middleware/auth.js`)**: Evaluates signed JWT payload claims and blocks unauthorized HTTP requests before hitting the network.
+2. **On-Chain Smart Contract (`ehrContract.js` & `EHRContract.sol`)**: Hardened on-chain role checking (`onlyAdmin`, `onlyDoctor`, `onlyPatient`, `_checkDoctorAccess`) guarantees data confidentiality even if the backend is bypassed.
+
+Every attempt (granted or denied) is immutably recorded in the blockchain audit trail.
+
+---
+
+
+## 📦 Smart Contract & Chaincode Architecture
+
+The system provides dual implementation for smart contracts:
+1. **Solidity Smart Contract** (`chaincode/solidity/EHRContract.sol`): Written in Solidity `^0.8.20` for EVM/Ethereum compatible networks, utilizing custom errors, events, and role modifiers (`onlyAdmin`, `onlyDoctor`, `onlyPatient`, `onlyPharmacist`).
+2. **Hyperledger Fabric Chaincode** (`chaincode/lib/ehrContract.js`): Written in Node.js using `fabric-contract-api` for Hyperledger Fabric channels with CouchDB rich queries.
+
+### Function Reference
+
+| Function | Description | Access Control / Roles |
+|----------|-------------|------------------------|
+| `registerPatient` | Register new patient profile | Admin or Patient (self) |
+| `registerDoctor` | Register new doctor credentials | Admin only |
+| `verifyDoctor` | Verify doctor credentials | Admin only |
+| `grantDoctorAccess` | Grant doctor access with expiration | Admin or Patient (own) |
+| `revokeDoctorAccess` | Revoke doctor access | Admin or Patient (own) |
+| `createHealthRecord` | Create record linked to IPFS hash | Doctor only (Access check) |
+| `getHealthRecord` | Retrieve health record details | Admin, Patient (own), Doctor (Access check) |
+| `getPatientRecords` | Get all records for a patient | Admin, Patient (own), Doctor (Access check) |
+| `createPrescription` | Issue digital prescription | Doctor only (Access check) |
+| `dispensePrescription` | Dispense active prescription | Pharmacist or Admin |
+| `getPrescription` | Retrieve prescription details | Admin, Patient (own), Doctor |
+| `getPatientPrescriptions` | Get all patient prescriptions | Admin, Patient (own), Doctor |
+| `createAppointment` | Schedule patient-doctor appointment | Doctor or Admin |
+| `getPatientAppointments` | View scheduled appointments | Patient (own), Doctor, Admin |
+| `createBillingRecord` | Issue billing item | Admin only |
+| `getPatientBilling` | View billing details | Patient (own), Admin |
+| `queryAllPatients` | Query all registered patients | Admin only |
+| `queryAllDoctors` | Query all registered doctors | Admin only |
+| `getDoctorPatients` | Get assigned patients for doctor | Doctor or Admin |
+| `queryRecordsByDoctor` | Query records authored by doctor | Doctor or Admin |
+| `getAuditTrail` | Immutable transaction audit log | Admin, Patient (own), Doctor |
+
+---
+
 
 ## 🏗 Environment Variables
 
