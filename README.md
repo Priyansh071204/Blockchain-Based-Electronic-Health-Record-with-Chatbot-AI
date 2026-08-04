@@ -363,9 +363,13 @@ Every attempt (granted or denied) is immutably recorded in the blockchain audit 
 
 ## 📦 Smart Contract & Chaincode Architecture
 
-The system provides dual implementation for smart contracts:
-1. **Solidity Smart Contract** (`chaincode/solidity/EHRContract.sol`): Written in Solidity `^0.8.20` for EVM/Ethereum compatible networks, utilizing custom errors, events, and role modifiers (`onlyAdmin`, `onlyDoctor`, `onlyPatient`, `onlyPharmacist`).
-2. **Hyperledger Fabric Chaincode** (`chaincode/lib/ehrContract.js`): Written in Node.js using `fabric-contract-api` for Hyperledger Fabric channels with CouchDB rich queries.
+The system's core business logic and access control rules are implemented using **Solidity (`chaincode/solidity/EHRContract.sol`)** for EVM/Ethereum networks, as well as Hyperledger Fabric Node.js chaincode (`chaincode/lib/ehrContract.js`):
+
+1. **Solidity Smart Contract (`chaincode/solidity/EHRContract.sol`) [Primary]**: 
+   Written in Solidity `^0.8.20` targeting EVM networks. Implements strict Role-Based Access Control using custom enums (`Role`: `NONE`, `ADMIN`, `PATIENT`, `DOCTOR`, `PHARMACIST`), modifiers (`onlyAdmin`, `onlyAdminOrRole`), custom errors (`Unauthorized`, `AlreadyExists`, `NotFound`, `AccessDenied`), on-chain audit logs, and dynamic doctor access verification via `_checkDoctorAccess`.
+
+2. **Hyperledger Fabric Chaincode (`chaincode/lib/ehrContract.js`)**: 
+   Written in Node.js using `fabric-contract-api` for enterprise Hyperledger Fabric network channels with CouchDB rich state database indexing.
 
 ### Function Reference
 
